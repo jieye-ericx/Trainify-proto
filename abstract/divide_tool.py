@@ -195,10 +195,10 @@ def initiate_divide_tool_rtree(state_space, initial_intervals, key_dim, file_nam
         print('rtree中状态数量', rtree.get_size())
     else:
         key_dim = []
-    dp = DivideTool(divide_point, dp_sets)
-    dp.key_dim = key_dim
-    dp.rtree = rtree
-    return dp
+    divide_tool = DivideTool(divide_point, dp_sets)
+    divide_tool.key_dim = key_dim
+    divide_tool.rtree = rtree
+    return divide_tool
 
 # 用于yield rtree构造中的状态的上下界
 def divide(state_space, intervals):

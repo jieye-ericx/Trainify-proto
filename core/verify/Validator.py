@@ -7,12 +7,12 @@ import gym
 import numpy as np
 from scipy.optimize import Bounds, minimize
 
-from pyModelChecking import *
+from core.pyModelChecking import *
 # from pyModelChecking.CTL import *
 
 import torch
 
-from pyModelChecking.CTL import Parser, modelcheck
+from core.pyModelChecking.CTL import Parser, modelcheck
 
 
 class Validator:
