@@ -2,92 +2,18 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2e651c7b-cc03-42f3-8cb7-5e30bf630cd2" name="变更" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/abstract/divide_tool.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/agents/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/agents/pendulum-actor-target.pt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/agents/pendulum-actor.pt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/agents/pendulum-critic-target.pt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/agents/pendulum-critic.pt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/agents/pendulum_agent.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/BDD/BDD.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/BDD/OBDD.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/BDD/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/BDD/ordering.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/CTL/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/CTL/language.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/CTL/model_checking.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/CTL/parser.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/CTLS/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/CTLS/language.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/CTLS/model_checking.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/CTLS/parser.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/LTL/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/LTL/language.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/LTL/model_checking.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/LTL/parser.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/PL/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/PL/language.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/PL/parser.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/graph.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/kripke.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/language.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/parser.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/tests/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/tests/test_CTLS_language.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/tests/test_CTLS_modelchecking.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/tests/test_CTLS_parser.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/tests/test_CTL_language.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/tests/test_CTL_modelchecking.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/tests/test_CTL_parser.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/tests/test_LTL_language.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/tests/test_LTL_modelchecking.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/tests/test_LTL_parser.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/tests/test_OBDD.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/tests/test_graph.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/pyModelChecking/tests/test_kripke.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/verify/Configurator.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/verify/Validator.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/verify/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/verify/cegar.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/verify/divide_tool.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/verify/pendulum/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/verify/pendulum/pendulum_Relu_3_128_p3.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/verify/pendulum/pendulum_env.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/verify/pendulum/pendulum_example.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/verify/pendulum/results/pendulum_Relu_3_128_p3.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pendulum_20221009_21_55_53/pendulum-actor-target.pt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pendulum_20221009_21_55_53/pendulum-actor.pt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pendulum_20221009_21_55_53/pendulum-critic-target.pt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pendulum_20221009_21_55_53/pendulum-critic.pt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pendulum_20221009_21_57_32/pendulum-actor-target.pt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pendulum_20221009_21_57_32/pendulum-actor.pt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pendulum_20221009_21_57_32/pendulum-critic-target.pt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pendulum_20221009_21_57_32/pendulum-critic.pt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/env/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/evaluate/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/evaluate/evaluate_pendulum.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pendulum_abstraction1.dat" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pendulum_abstraction1.idx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/test.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils/save_model.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils/str_list.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/Trainify-proto.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="directory" />
+    </option>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -247,7 +173,7 @@
       <workItem from="1664555733705" duration="121000" />
       <workItem from="1665143785308" duration="458000" />
       <workItem from="1665144339897" duration="1343000" />
-      <workItem from="1665219034214" duration="14761000" />
+      <workItem from="1665219034214" duration="14940000" />
     </task>
     <servers />
   </component>
