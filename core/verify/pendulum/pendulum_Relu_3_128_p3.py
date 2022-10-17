@@ -3,7 +3,7 @@ import sys
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(BASE_DIR)
-from abstract.pendulum.pendulum_abs import *
+from core.abstract.pendulum.pendulum_abs import *
 from core.verify.cegar import cegar
 from core.verify.pendulum.pendulum_env import PendulumEnv
 

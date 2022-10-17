@@ -118,7 +118,8 @@ class Validator:
                         #     bad_label_cnt += 1
                         abstract_state_count += 1
             t3 = time.time()
-            print(abstract_state_count, sta_cnt, 'depth', i, t3 - t0, ' ', tt,  'increase', abstract_state_count - old_abs_cnt)
+            print(abstract_state_count, sta_cnt, 'depth', i, t3 - t0, ' ', tt, 'increase',
+                  abstract_state_count - old_abs_cnt)
             # if bad_state:
             #     return None
             old_abs_cnt = abstract_state_count
@@ -162,3 +163,19 @@ class Validator:
                 return True, qualified_states
             else:
                 return False, qualified_states
+
+
+class Configurator:
+    def __init__(self, initial_state, proposition_list, limited_count, limited_depth, atomic_propositions, formula,
+                 get_abstract_state, get_abstract_state_label, get_abstract_state_hash, get_next_states, rtree):
+        self.initial_state = initial_state
+        self.proposition_list = proposition_list
+        self.limited_count = limited_count
+        self.limited_depth = limited_depth
+        self.atomic_propositions = atomic_propositions
+        self.formula = formula
+        self.get_abstract_state = get_abstract_state
+        self.get_abstract_state_label = get_abstract_state_label
+        self.get_abstract_state_hash = get_abstract_state_hash
+        self.get_next_states = get_next_states
+        self.rtree = rtree

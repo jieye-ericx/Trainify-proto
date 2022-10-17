@@ -7,15 +7,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from utils import str_to_list,get_data_save_dir
+from core.utils import str_to_list
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(BASE_DIR)
-script_path = get_data_save_dir('pendulum')
-pt_file0 = os.path.join(script_path, "pendulum-actor.pt")
-pt_file1 = os.path.join(script_path, "pendulum-critic.pt")
-pt_file2 = os.path.join(script_path, "pendulum-actor-target.pt")
-pt_file3 = os.path.join(script_path, "pendulum-critic-target.pt")
+
 
 class Actor(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
@@ -53,21 +49,21 @@ class Critic(nn.Module):
         return x
 
 
-class Agent(object):
-    def __init__(self, divide_tool,env):
-        self.originEnv=env
+class DDPGAgent(object):
+    # def __init__(self, divide_tool, env):
+    def __init__(self, env, config):
+        self.originEnv = env
         self.env = env
-        self.gamma = 0.99
-        self.actor_lr = 0.0001
-        self.critic_lr = 0.001
-        self.tau = 0.02
-        self.capacity = 10000
-        self.batch_size = 32
-
+        self.gamma = config['gamma']
+        self.actor_lr = config['actor_lr']
+        self.critic_lr = config['critic_lr']
+        self.tau = config['tau']
+        self.capacity = config['capacity']
+        self.batch_size = config['batch_size']
         s_dim = self.env.observation_space.shape[0] * 2
         a_dim = self.env.action_space.shape[0]
 
-        self.divide_tool = divide_tool
+        # self.divide_tool = divide_tool
         self.actor = Actor(s_dim, 128, a_dim)
         self.network = Actor(s_dim, 128, a_dim)
         self.actor_target = Actor(s_dim, 128, a_dim)
@@ -79,6 +75,12 @@ class Agent(object):
 
         self.actor_target.load_state_dict(self.actor.state_dict())
         self.critic_target.load_state_dict(self.critic.state_dict())
+
+        script_path = '/Users/ericx/PycharmProjects/Trainify-proto/data/test_ddpg_pendulum_20221017_18_20_05'
+        self.pt_file0 = os.path.join(script_path, "pendulum-actor.pt")
+        self.pt_file1 = os.path.join(script_path, "pendulum-critic.pt")
+        self.pt_file2 = os.path.join(script_path, "pendulum-actor-target.pt")
+        self.pt_file3 = os.path.join(script_path, "pendulum-critic-target.pt")
 
     def reset(self):
         self.env = self.originEnv
@@ -104,23 +106,24 @@ class Agent(object):
         self.critic_target.load_state_dict(self.critic.state_dict())
 
     def save(self):  # 保存网络的参数数据
-        torch.save(self.actor.state_dict(), pt_file0)
-        torch.save(self.critic.state_dict(), pt_file1)
-        torch.save(self.actor_target.state_dict(), pt_file2)
-        torch.save(self.critic_target.state_dict(), pt_file3)
+        torch.save(self.actor.state_dict(), self.pt_file0)
+        torch.save(self.critic.state_dict(), self.pt_file1)
+        torch.save(self.actor_target.state_dict(), self.pt_file2)
+        torch.save(self.critic_target.state_dict(), self.pt_file3)
         # print(pt_file + " saved.")
 
     # 加载网络的参数数据
     def load(self):
-        self.actor.load_state_dict(torch.load(pt_file0))
-        self.network.load_state_dict(torch.load(pt_file0))
-        self.critic.load_state_dict(torch.load(pt_file1))
-        self.actor_target.load_state_dict(torch.load(pt_file2))
-        self.critic_target.load_state_dict(torch.load(pt_file3))
-        print(pt_file3 + " loaded.")
+        self.actor.load_state_dict(torch.load(self.pt_file0))
+        self.network.load_state_dict(torch.load(self.pt_file0))
+        self.critic.load_state_dict(torch.load(self.pt_file1))
+        self.actor_target.load_state_dict(torch.load(self.pt_file2))
+        self.critic_target.load_state_dict(torch.load(self.pt_file3))
+        print(self.pt_file3 + " loaded.")
 
     def act(self, s0):
-        abs = str_to_list(self.divide_tool.get_abstract_state(s0))
+        abs = str_to_list(s0)
+        # abs = str_to_list(self.divide_tool.get_abstract_state(s0))
         # s0 = torch.tensor(s0, dtype=torch.float).unsqueeze(0)
         s0 = torch.tensor(abs, dtype=torch.float).unsqueeze(0)
         a0 = self.actor(s0).squeeze(0).detach().numpy()

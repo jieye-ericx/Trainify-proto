@@ -3,7 +3,7 @@ from scipy.optimize import minimize, Bounds
 import math
 import numpy as np
 
-from utils import str_to_list
+from core.utils import str_to_list
 
 
 class PendulumEnv():
