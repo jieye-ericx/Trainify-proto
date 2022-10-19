@@ -27,8 +27,8 @@ class Actor(nn.Module):
         self.linear3.bias.data.zero_()
 
     def forward(self, s):
-        x = F.relu(self.linear1(s))
-        x = F.relu(self.linear2(x))
+        x = torch.tanh(self.linear1(s))
+        x = torch.tanh(self.linear2(x))
         x = torch.tanh(self.linear3(x))
 
         return x
