@@ -1,6 +1,8 @@
 # Trainify-proto
 
-### 目录介绍
+本工具是CAV2022中[Trainify: A CEGAR-Driven Training and Verification Framework for Safe Deep Reinforcement Learning](https://faculty.ecnu.edu.cn/_upload/article/files/39/62/197880be44aba90d9d44ac6de8bb/b7ef9fd1-51e0-4284-8af0-5d7a2f9f1869.pdf)的原型工具，Trainify-proto在论文代码的基础上进行了重构改进，增强了易用性、可拓展性和通用性，实现了自定义抽象训练流程和自选形式化验证等功能。
+
+### 核心架构
 
 `abstract` 存放抽象相关工具
 

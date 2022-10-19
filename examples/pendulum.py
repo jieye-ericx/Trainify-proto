@@ -2,9 +2,10 @@ import numpy as np
 
 # 获取文件所在的当前路径
 from core.utils import str_to_list
-from core.env.pendulum import Pendulum
+from core.env import Pendulum
 from core.agent import DDPGAgent
 from core import Trainify
+from evaluate.evaluate_pendulum import evaluate_pendulum
 
 if __name__ == "__main__":
     env_config = {
@@ -34,17 +35,15 @@ if __name__ == "__main__":
         experiment_name="test_ddpg_pendulum",
         log_dir='tdp_log'
     )
-
     reward_list = []
-
     for episode in range(2000):
         episode_reward = 0
         s = t.env.reset()
         abs = t.divide_tool.get_abstract_state(s)
         for step in range(500):
             # env.render()
-            a = t.agent.act(s)
-            s_next, r1, done, _ = t.env.step(abs)
+            a = t.agent.act(abs)
+            s_next, r1, done, _ = t.env.step(a)
             abs_next = t.divide_tool.get_abstract_state(s_next)
             t.agent.put(str_to_list(abs), a, r1, str_to_list(abs_next))
             episode_reward += r1
@@ -52,14 +51,14 @@ if __name__ == "__main__":
             s = s_next
             abs = abs_next
         if episode % 5 == 4:
-            t.agent.save()
+            t.save_model(['actor', 'critic', 'actor_target', 'critic_target'])
         reward_list.append(episode_reward)
         print(episode, ': ', episode_reward)
+
         if episode >= 10 and np.min(reward_list[-3:]) > -3:
             #     min_reward = evaluate(agent)
             #     if min_reward > -30:
-            t.agent.save()
+            t.save_model(['actor', 'critic', 'actor_target', 'critic_target'])
             break
-
-    # agent.load()
-    # evaluate_pendulum(agent, env)
+    t.load_model(['actor', 'critic', 'actor_target', 'critic_target'])
+    # evaluate_pendulum(t.agent, t.env)

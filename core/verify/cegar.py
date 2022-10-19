@@ -3,7 +3,7 @@ import time
 import numpy as np
 from rtree import index
 
-from core.verify.Validator import Validator
+from core.verify import Validator
 
 record_num = 1
 

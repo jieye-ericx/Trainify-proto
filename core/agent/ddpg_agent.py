@@ -105,21 +105,21 @@ class DDPGAgent(object):
         self.actor_target.load_state_dict(self.actor.state_dict())
         self.critic_target.load_state_dict(self.critic.state_dict())
 
-    def save(self):  # 保存网络的参数数据
-        torch.save(self.actor.state_dict(), self.pt_file0)
-        torch.save(self.critic.state_dict(), self.pt_file1)
-        torch.save(self.actor_target.state_dict(), self.pt_file2)
-        torch.save(self.critic_target.state_dict(), self.pt_file3)
-        # print(pt_file + " saved.")
-
-    # 加载网络的参数数据
-    def load(self):
-        self.actor.load_state_dict(torch.load(self.pt_file0))
-        self.network.load_state_dict(torch.load(self.pt_file0))
-        self.critic.load_state_dict(torch.load(self.pt_file1))
-        self.actor_target.load_state_dict(torch.load(self.pt_file2))
-        self.critic_target.load_state_dict(torch.load(self.pt_file3))
-        print(self.pt_file3 + " loaded.")
+    # def save(self):  # 保存网络的参数数据
+    #     torch.save(self.actor.state_dict(), self.pt_file0)
+    #     torch.save(self.critic.state_dict(), self.pt_file1)
+    #     torch.save(self.actor_target.state_dict(), self.pt_file2)
+    #     torch.save(self.critic_target.state_dict(), self.pt_file3)
+    #     # print(pt_file + " saved.")
+    #
+    # # 加载网络的参数数据
+    # def load(self):
+    #     self.actor.load_state_dict(torch.load(self.pt_file0))
+    #     self.network.load_state_dict(torch.load(self.pt_file0))
+    #     self.critic.load_state_dict(torch.load(self.pt_file1))
+    #     self.actor_target.load_state_dict(torch.load(self.pt_file2))
+    #     self.critic_target.load_state_dict(torch.load(self.pt_file3))
+    #     print(self.pt_file3 + " loaded.")
 
     def act(self, s0):
         abs = str_to_list(s0)

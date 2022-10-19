@@ -12,7 +12,7 @@ class Trainify:
                  env_config={},
                  env_class=None,
                  agent_config={},
-                 agent_class=DDPGAgent,
+                 agent_class={},
                  verify_config={},
                  verify=False,
                  log_dir='',
@@ -38,7 +38,7 @@ class Trainify:
                                                    high=self._np_state_space[1])
 
         self.env = self.env_class()
-        self._agent = self.agent_class(self.env, config=self.agent_config)
+        self.agent = self.agent_class(self.env, config=self.agent_config)
 
         if self.verify:
             self.divide_tool = initiate_divide_tool_rtree(self.env_config['state_space'],
@@ -48,6 +48,10 @@ class Trainify:
         else:
             self.divide_tool = initiate_divide_tool(self.env_config['state_space'],
                                                     self.env_config['abs_initial_intervals'])
+
+        # print(self.agent.__dict__['actor'])
+        self.save_model = self.recorder.create_save_model(self.agent)
+        self.load_model = self.recorder.create_load_model(self.agent)
 
     def _handle_dict_env_state(self):
         abs_obs = {}

@@ -200,7 +200,7 @@ def initiate_divide_tool_rtree(state_space, initial_intervals, key_dim, file_nam
         rtree = index.Index(file_name, properties=p)
         if rtree.get_size() == 0:
             rtree = index.Index(file_name, divide(key_state_space, key_initial_intevals), properties=p)
-        print('rtree中状态数量', rtree.get_size())
+        print('DivideTool rtree状态数量', rtree.get_size())
     else:
         key_dim = []
     divide_tool = DivideTool(divide_point, dp_sets)
