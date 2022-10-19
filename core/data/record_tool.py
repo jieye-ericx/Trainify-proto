@@ -1,10 +1,9 @@
 import os
 import time
 import sys
-# from torch.utils.tensorboard import SummaryWriter
+import torch
 from tensorboardX import SummaryWriter
 import subprocess
-
 
 ROOT_PROJECT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ROOT_DATA_PATH = os.path.join(ROOT_PROJECT_PATH, "data")
@@ -68,6 +67,22 @@ class Recorder:
         p.stdin.close()
         print(p.stdout.read())
 
+    def create_save_model(self, agent):
+        def save_model(model_names):
+            for name in model_names:
+                torch.save(agent.__dict__[name].state_dict(), self.data_path + '/' + name + '.pt')
+                print('Trainify 模型 ' + name + ' 保存完毕')
+
+        return save_model
+
+    def create_load_model(self, agent):
+        def load_model(model_names):
+            for name in model_names:
+                agent.__dict__[name].load_state_dict(torch.load(self.data_path + '/' + name + '.pt'))
+                print('Trainify 模型 ' + name + ' 加载完毕')
+
+        return load_model
+
 
 if __name__ == '__main__':
     a = Recorder('ttt', 'ttt_results')
@@ -79,4 +94,3 @@ if __name__ == '__main__':
         a.add_reward("test2", i * 10)
     a.writeAll2TensorBoard()
     a.openTensorBoard()
-
