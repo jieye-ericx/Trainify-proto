@@ -55,9 +55,9 @@ class Trainify:
         self.load_model = self.recorder.create_load_model(self.agent)
         self.recorder.save_model = self.save_model
         self.recorder.load_model = self.load_model
-        self._create_cal_state_func(self.env)
+        self._create_cal_state_func(self.env_config, self.env)
 
-    def _create_cal_state_func(self, Env):
+    def create_cal_state_func(self, config, Env):
         labels = [
             ['sin', 'math.sin'],
             ['cos', 'math.cos'],
@@ -74,16 +74,15 @@ class Trainify:
 
             return cal
 
-        for i, str in enumerate(self.env_config['dynamics']):
-            for a in labels:
-                reg = re.compile(re.escape(a[0]), re.IGNORECASE)
-                self.env_config['dynamics'][i] = reg.sub(a[1], self.env_config['dynamics'][i])
+        for i, str in enumerate(config['dynamics']):
+            for arr in labels:
+                reg = re.compile(re.escape(arr[0]), re.IGNORECASE)
+                config['dynamics'][i] = reg.sub(arr[1], config['dynamics'][i])
 
-            setattr(Env, self.env_config['states_name'][i] + '_maximum',
-                    from_function(self.env_config['dynamics'][i], True))
-            setattr(Env, self.env_config['states_name'][i] + '_minimum',
-                    from_function(self.env_config['dynamics'][i], False))
-
+            setattr(Env, config['states_name'][i] + '_maximum',
+                    from_function(config['dynamics'][i], True))
+            setattr(Env, config['states_name'][i] + '_minimum',
+                    from_function(config['dynamics'][i], False))
         print('Trainify 在Env中加入状态最值计算函数成功')
 
     def _handle_dict_env_state(self):

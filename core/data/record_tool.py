@@ -12,7 +12,6 @@ class Recorder:
                  data_dir_name='',
                  ):
         print('Recorder init')
-        if data_dir_name == '': data_dir_name = experiment_name
         self.data_path = os.path.join(ROOT_DATA_PATH, data_dir_name) + time.strftime("_%Y%m%d_%H_%M_%S",
                                                                                      time.localtime())
         self._create_dir(self.data_path)
