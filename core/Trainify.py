@@ -6,6 +6,8 @@ import numpy as np
 from core.abstract import initiate_divide_tool_rtree, initiate_divide_tool
 from core.agent import DDPGAgent
 from core.data import Recorder
+from core.verify import cegar
+from core.utils import str_to_list
 
 
 class Trainify:
@@ -13,7 +15,7 @@ class Trainify:
                  env_config={},
                  env_class=None,
                  agent_config={},
-                 agent_class={},
+                 agent_class=None,
                  verify_config={},
                  verify=False,
                  log_dir='',
@@ -26,9 +28,12 @@ class Trainify:
         self.verify_config = verify_config
         self.verify = verify
         self.experiment_name = experiment_name
-        # self.experiment_name = experiment_name + time.strftime("_%Y%m%d_%H_%M_%S", time.localtime())
+        self.rtree_name = 'rtree_' + experiment_name
+        self.experiment_name_with_time = experiment_name + time.strftime("_%Y%m%d_%H%M%S", time.localtime())
+
         if log_dir == '':
-            log_dir = self.experiment_name
+            log_dir = self.experiment_name_with_time
+        self.log_dir = log_dir
         self.recorder = Recorder(experiment_name=self.experiment_name, data_dir_name=log_dir)
 
         self._np_state_space = np.array(self.env_config['state_space'])
@@ -45,7 +50,7 @@ class Trainify:
             self.divide_tool = initiate_divide_tool_rtree(self.env_config['state_space'],
                                                           self.env_config['abs_initial_intervals'],
                                                           self.env_config['state_key_dim'],
-                                                          'rtree_' + experiment_name)
+                                                          self.rtree_name)
         else:
             self.divide_tool = initiate_divide_tool(self.env_config['state_space'],
                                                     self.env_config['abs_initial_intervals'])
@@ -56,6 +61,41 @@ class Trainify:
         self.recorder.save_model = self.save_model
         self.recorder.load_model = self.load_model
         self._create_cal_state_func(self.env_config, self.env)
+
+    def run_verify_cegar(self, verify_env, train_func=None):
+        if not self.verify:
+            print('Trainify 初始化Trainify时verify未设置为True，请重新初始化')
+            return
+        if train_func is None: train_func = self.train_agent
+        cegar(self.rtree_name, self.agent, self.divide_tool, verify_env, self.verify_config)
+
+    def train_agent(self):
+
+        reward_list = []
+        for episode in range(2000):
+            episode_reward = 0
+            s = self.env.reset()
+            abs = self.divide_tool.get_abstract_state(s)
+            for step in range(500):
+                # env.render()
+                a = self.agent.act(abs)
+                s_next, r1, done, _ = self.env.step(a)
+                abs_next = self.divide_tool.get_abstract_state(s_next)
+                self.agent.put(str_to_list(abs), a, r1, str_to_list(abs_next))
+                episode_reward += r1
+                self.agent.learn()
+                s = s_next
+                abs = abs_next
+            if episode % 5 == 4:
+                self.save_model(['actor', 'critic', 'actor_target', 'critic_target'])
+            reward_list.append(episode_reward)
+            print(episode, ': ', episode_reward)
+
+            if episode >= 10 and np.min(reward_list[-3:]) > -3:
+                #     min_reward = evaluate(agent)
+                #     if min_reward > -30:
+                self.save_model(['actor', 'critic', 'actor_target', 'critic_target'])
+                break
 
     def create_cal_state_func(self, config, Env):
         labels = [

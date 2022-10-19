@@ -26,14 +26,18 @@ if __name__ == "__main__":
         'batch_size': 32,
     }
 
+    verify_config = {
+        'max_iteration': 5
+    }
+
     t = Trainify(
         env_config=env_config,
         env_class=Pendulum,
         agent_config=agent_config,
         agent_class=DDPGAgent,
         verify=True,
+        verify_config=verify_config,
         experiment_name="test_ddpg_pendulum",
-        log_dir='tdp_log'
     )
     # reward_list = []
     # for episode in range(2000):

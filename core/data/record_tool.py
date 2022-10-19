@@ -12,15 +12,14 @@ ROOT_DATA_PATH = os.path.join(ROOT_PROJECT_PATH, "data")
 class Recorder:
     def __init__(self,
                  experiment_name,
-                 data_dir_name='',
+                 data_dir_name,
                  ):
         print('Recorder init')
-        self.data_path = os.path.join(ROOT_DATA_PATH, data_dir_name) + time.strftime("_%Y%m%d_%H_%M_%S",
-                                                                                     time.localtime())
-        self._create_dir(self.data_path)
         self.experiment_name = experiment_name
+        self.data_dir_name = data_dir_name
+        self.data_path = os.path.join(ROOT_DATA_PATH, data_dir_name)
+        self._create_dir(self.data_path)
         self.title_reward = {}
-        print(self.data_path)
 
     def _create_dir(self, path):
         """
