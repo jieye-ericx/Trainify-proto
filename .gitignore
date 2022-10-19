@@ -1,5 +1,7 @@
 # Created by https://www.toptal.com/developers/gitignore/api/pycharm,macos,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=pycharm,macos,python
+###project###
+data/**
 
 ### macOS ###
 # General

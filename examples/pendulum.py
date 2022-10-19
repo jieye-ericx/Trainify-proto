@@ -10,11 +10,11 @@ from evaluate.evaluate_pendulum import evaluate_pendulum
 if __name__ == "__main__":
     env_config = {
         "dim": 3,
-        "states_name": ["x1", "x2", "x3"],
+        "states_name": ["x0", "x1", "x2"],
         "state_space": [[-1.5, -1.5, -10], [1.5, 1.5, 10]],
         "abs_initial_intervals": [0.16, 0.16, 0.01],
         "state_key_dim": [0, 1],
-        "dynamics": "x1^2+x2"
+        "dynamics": ["x[0]=x[1]+2+x[2]", "x[1]=sin(x[2])+cos(x[0])", "x[2]=x[1]+x[0]"]
     }
 
     agent_config = {

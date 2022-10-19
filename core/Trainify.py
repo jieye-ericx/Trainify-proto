@@ -1,5 +1,6 @@
 import time
 
+import re
 import gym
 import numpy as np
 from core.abstract import initiate_divide_tool_rtree, initiate_divide_tool
@@ -34,8 +35,8 @@ class Trainify:
         # Dict(x1:Box([-1.5], [1.5], (1,), float32), x2:Box([-1.5], [1.5], (1,), float32), x3:Box([-10.], [10.], (1,), float32))
         self._gym_dict_state_space = gym.spaces.Dict(self._handle_dict_env_state())
         # Box([ -1.5  -1.5 -10. ], [ 1.5  1.5 10. ], (3,), float32)
-        self._gym_box_state_space = gym.spaces.Box(low=self._np_state_space[0],
-                                                   high=self._np_state_space[1])
+        self._gym_box_state_space = gym.spaces.Box(low=np.float32(self._np_state_space[0]),
+                                                   high=np.float32(self._np_state_space[1]), dtype=np.float32)
 
         self.env = self.env_class()
         self.agent = self.agent_class(self.env, config=self.agent_config)
@@ -52,15 +53,48 @@ class Trainify:
         # print(self.agent.__dict__['actor'])
         self.save_model = self.recorder.create_save_model(self.agent)
         self.load_model = self.recorder.create_load_model(self.agent)
+        self.recorder.save_model = self.save_model
+        self.recorder.load_model = self.load_model
+        self._create_cal_state_func(self.env)
+
+    def _create_cal_state_func(self, Env):
+        labels = [
+            ['sin', 'math.sin'],
+            ['cos', 'math.cos'],
+            ['tan', 'math.tan'],
+            ['tanh', 'math.tanh']
+        ]
+
+        def from_function(str, max):
+            def cal(self, x):
+                if max:
+                    return eval(str)
+                else:
+                    return -eval(str)
+
+            return cal
+
+        for i, str in enumerate(self.env_config['dynamics']):
+            for a in labels:
+                reg = re.compile(re.escape(a[0]), re.IGNORECASE)
+                self.env_config['dynamics'][i] = reg.sub(a[1], self.env_config['dynamics'][i])
+
+            setattr(Env, self.env_config['states_name'][i] + '_maximum',
+                    from_function(self.env_config['dynamics'][i], True))
+            setattr(Env, self.env_config['states_name'][i] + '_minimum',
+                    from_function(self.env_config['dynamics'][i], False))
+
+        print('Trainify 在Env中加入状态最值计算函数成功')
 
     def _handle_dict_env_state(self):
         abs_obs = {}
         for i, name in enumerate(self.env_config['states_name']):
             abs_obs.update({
                 name: gym.spaces.Box(
-                    low=float(self.env_config['state_space'][0][i]),
-                    high=float(self.env_config['state_space'][1][i]),
-                    shape=(1,)
+                    low=np.float32(self.env_config['state_space'][0][i]),
+                    high=np.float32(self.env_config['state_space'][1][i]),
+                    shape=(1,),
+                    dtype=np.float32
                 )
             })
         return abs_obs
