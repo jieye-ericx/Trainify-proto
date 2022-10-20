@@ -8,7 +8,7 @@ from rtree import index
 from core.utils import str_to_list, list_to_str
 
 
-def near_bound(current, target, standard=[0.001, 0.001, 0.001]):
+def near_bound(current, target, standard):
     dim = len(current)
     half_dim = int(dim / 2)
     counter = 0
@@ -34,7 +34,7 @@ def near_bound(current, target, standard=[0.001, 0.001, 0.001]):
         return False
 
 
-def combine_bound_list(bound_list, near_bound):
+def combine_bound_list(bound_list, std):
     relation = []
     length = len(bound_list)
     compacted_bound_list = []
@@ -42,7 +42,7 @@ def combine_bound_list(bound_list, near_bound):
         relation.append([False] * length)
     for i in range(length):
         for j in range(length):
-            if i != j and near_bound(bound_list[i], bound_list[j]):
+            if i != j and near_bound(bound_list[i], bound_list[j], std):
                 relation[i][j] = True
                 relation[j][i] = True
     # 先构造邻接链表，之后根据表格合并bound

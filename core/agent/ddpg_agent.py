@@ -29,7 +29,7 @@ class Actor(nn.Module):
     def forward(self, s):
         x = torch.tanh(self.linear1(s))
         x = torch.tanh(self.linear2(x))
-        x = torch.tanh(self.linear3(x))
+        x = self.linear3(x)
 
         return x
 
