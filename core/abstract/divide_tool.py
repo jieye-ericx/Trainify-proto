@@ -8,6 +8,32 @@ from rtree import index
 from core.utils import str_to_list, list_to_str
 
 
+def near_bound(current, target, standard=[0.001, 0.001, 0.001]):
+    dim = len(current)
+    half_dim = int(dim / 2)
+    counter = 0
+    record_dim = None
+    for i in range(half_dim):
+        if abs(current[i] - target[i]) > standard[i] or abs(current[i + half_dim] - target[i + half_dim]) > \
+                standard[i]:
+            counter += 1
+            record_dim = i
+    if counter <= 0 or contain(current, target):
+        return True
+    elif counter == 1:
+        if current[record_dim] - target[record_dim + half_dim] <= standard[record_dim] or target[record_dim] - \
+                current[
+                    record_dim + half_dim] <= standard[record_dim]:
+            return True
+        elif (target[record_dim] < current[record_dim] < target[record_dim + half_dim]) or (
+                current[record_dim] < target[record_dim] < current[record_dim + half_dim]):
+            return True
+        else:
+            return False
+    else:
+        return False
+
+
 def combine_bound_list(bound_list, near_bound):
     relation = []
     length = len(bound_list)
