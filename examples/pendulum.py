@@ -30,6 +30,10 @@ if __name__ == "__main__":
         'max_iteration': 5
     }
 
+    train_config = {
+        'step_num': 500,
+        'episode_num': 2000
+    }
     t = Trainify(
         env_config=env_config,
         env_class=Pendulum,
@@ -39,6 +43,7 @@ if __name__ == "__main__":
         verify_config=verify_config,
         experiment_name="test_ddpg_pendulum",
     )
+    t.train_agent(train_config)
     # reward_list = []
     # for episode in range(2000):
     #     episode_reward = 0

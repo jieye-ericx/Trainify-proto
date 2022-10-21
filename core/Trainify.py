@@ -6,7 +6,7 @@ import numpy as np
 from core.abstract import initiate_divide_tool_rtree, initiate_divide_tool
 from core.agent import DDPGAgent
 from core.data import Recorder
-from core.verify import cegar
+from core.validator import cegar
 from core.utils import str_to_list
 
 
@@ -20,7 +20,6 @@ class Trainify:
                  verify=False,
                  log_dir='',
                  experiment_name="default_name"):
-
         self.env_config = env_config
         self.env_class = env_class
         self.agent_config = agent_config
@@ -60,38 +59,42 @@ class Trainify:
         self.load_model = self.recorder.create_load_model(self.agent)
         self.recorder.save_model = self.save_model
         self.recorder.load_model = self.load_model
-        self._create_cal_state_func(self.env_config, self.env)
+        self.create_cal_state_func(self.env_config, self.env)
 
     def run_verify_cegar(self, verify_env, train_func=None):
         if not self.verify:
             print('Trainify 初始化Trainify时verify未设置为True，请重新初始化')
             return
+        # TODO 构建验证用env
         if train_func is None: train_func = self.train_agent
         cegar(self.rtree_name, self.agent, self.divide_tool, verify_env, self.verify_config)
 
-    def train_agent(self):
+    def train_agent(self, config={'step_num': 500, 'episode_num': 2000}, name=''):
+        step_num = config['step_num']
+        episode_num = config['episode_num']
+        if name == '': name = 'default_name' + time.strftime("_%Y%m%d_%H%M%S", time.localtime())
+        self.recorder.create_data_result(name)
 
-        reward_list = []
-        for episode in range(2000):
+        for episode in range(episode_num):
             episode_reward = 0
             s = self.env.reset()
             abs = self.divide_tool.get_abstract_state(s)
-            for step in range(500):
+            for step in range(step_num):
                 # env.render()
                 a = self.agent.act(abs)
-                s_next, r1, done, _ = self.env.step(a)
+                s_next, reward, done, _ = self.env.step(a)
                 abs_next = self.divide_tool.get_abstract_state(s_next)
-                self.agent.put(str_to_list(abs), a, r1, str_to_list(abs_next))
-                episode_reward += r1
+                self.agent.put(str_to_list(abs), a, reward, str_to_list(abs_next))
+                episode_reward += reward
                 self.agent.learn()
                 s = s_next
                 abs = abs_next
             if episode % 5 == 4:
                 self.save_model(['actor', 'critic', 'actor_target', 'critic_target'])
-            reward_list.append(episode_reward)
-            print(episode, ': ', episode_reward)
+            self.recorder.add_reward(name, episode_reward)
+            print('episode: ', episode, ' episode_reward: ', episode_reward)
 
-            if episode >= 10 and np.min(reward_list[-3:]) > -3:
+            if episode >= 10 and np.min(self.recorder.get_reward(name)[-3:]) > -3:
                 #     min_reward = evaluate(agent)
                 #     if min_reward > -30:
                 self.save_model(['actor', 'critic', 'actor_target', 'critic_target'])

@@ -33,13 +33,18 @@ class Recorder:
         return path
 
     def create_data_result(self, title):
-        self.title_reward[title] = []
+        self.title_reward.update(
+            {title: {'reward_list': []}}
+        )
 
     def get_data_path(self):
         return self.data_path
 
     def add_reward(self, title, reward):
-        self.title_reward[title].append(reward)
+        self.title_reward[title]['reward_list'].append(reward)
+
+    def get_reward(self, title):
+        return self.title_reward[title]
 
     def writeAll2TensorBoard(self):
         """
@@ -48,8 +53,8 @@ class Recorder:
         """
         writer = SummaryWriter(log_dir=self.data_path)
         for title in self.title_reward.keys():
-            for i in range(len(self.title_reward[title])):
-                writer.add_scalar(tag=title, scalar_value=self.title_reward[title][i], global_step=i)
+            for i in range(len(self.title_reward[title]['reward_list'])):
+                writer.add_scalar(tag=title, scalar_value=self.title_reward[title]['reward_list'][i], global_step=i)
         writer.close()
 
     def openTensorBoard(self):

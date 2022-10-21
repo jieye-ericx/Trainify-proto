@@ -2,8 +2,8 @@ import os
 import sys
 
 from core.abstract.pendulum.pendulum_abs import *
-from core.verify.cegar import cegar
-from core.verify.pendulum.pendulum_env import PendulumEnv
+from core.validator.cegar import cegar
+from core.validator.pendulum.pendulum_env import PendulumEnv
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(BASE_DIR)

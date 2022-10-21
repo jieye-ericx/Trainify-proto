@@ -6,17 +6,17 @@
 """
 
 from .language import *
-from pyModelChecking.kripke import Kripke
+from core.validator.pyModelChecking.kripke import Kripke
 
 from .parser import Parser
 
 import sys
 
-import pyModelChecking.CTL
-import pyModelChecking.LTL
+import core.validator.pyModelChecking.CTL
+import core.validator.pyModelChecking.LTL
 
-CTL = sys.modules['pyModelChecking.CTL']
-LTL = sys.modules['pyModelChecking.LTL']
+CTL = sys.modules['core.validator.pyModelChecking.CTL']
+LTL = sys.modules['core.validator.pyModelChecking.LTL']
 
 
 def _get_a_new_atomic_proposition_for(kripke, formula):
@@ -56,7 +56,6 @@ def _remove_state_subformulas(kripke, formula, fair_label=None):
 
 
 def _checkQuantifiedFormula(kripke, formula, fair_label=None):
-
     subformula = _remove_state_subformulas(kripke, formula.subformula(0),
                                            fair_label)
 

@@ -3,7 +3,7 @@ import time
 import numpy as np
 from rtree import index
 
-from core.verify import Validator
+from core.validator import FMValidator
 
 record_num = 1
 
@@ -18,7 +18,7 @@ def cegar(rtree_name, agent, divide_tool, train_model, verify_env, config):
     agent.load()
     # evaluate(agent)
     tr = time.time()
-    v = Validator(verify_env, agent.network)
+    v = FMValidator(verify_env, agent.network)
     k = v.create_kripke_ctl()
     t1 = time.time()
     if k is None:
@@ -55,7 +55,7 @@ def cegar(rtree_name, agent, divide_tool, train_model, verify_env, config):
         verify_env.divide_tool = divide_tool
         verify_env.network = agent.network
         # pd = PendulumEnv(divide_tool, agent.actor)
-        v = Validator(verify_env, agent.network)
+        v = FMValidator(verify_env, agent.network)
         k = v.create_kripke_ctl()
         t1 = time.time()
         if k is None:
@@ -83,7 +83,7 @@ def cegar(rtree_name, agent, divide_tool, train_model, verify_env, config):
         tr = time.time()
         # verify_env.divide_tool = divide_tool
         verify_env.network = agent.network
-        v = Validator(verify_env, agent.network)
+        v = FMValidator(verify_env, agent.network)
         k = v.create_kripke_ctl()
         t1 = time.time()
         if k is None:

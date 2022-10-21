@@ -5,12 +5,11 @@
 .. moduleauthor:: Alberto Casagrande <acasagrande@units.it>
 """
 
-
-from pyModelChecking import PL
+from core.validator.pyModelChecking import PL
 
 from ..language import LNot
 from ..language import get_alphabet
-from pyModelChecking.PL import get_symbols
+from core.validator.pyModelChecking.PL import get_symbols
 
 from ..language import AlphabeticSymbol
 
@@ -118,6 +117,7 @@ class AtomicProposition(PL.AtomicProposition, StateFormula):
     The class representing atomic propositionic propositions.
 
     '''
+
     def __init__(self, name):
         ''' Initialize a CTL* atomic proposition.
 
@@ -171,6 +171,7 @@ class TemporalOperator(PathFormula):
     A class to represent temporal operators such as :math:`R` or :math:`X`.
 
     '''
+
     def __str__(self):
         if len(self._subformula) == 1:
             return '{}({})'.format(self.__class__.symbols[0],

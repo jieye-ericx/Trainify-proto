@@ -6,20 +6,20 @@
 """
 
 from .language import *
-from pyModelChecking.graph import DiGraph
-from pyModelChecking.graph import compute_SCCs
-from pyModelChecking.kripke import Kripke
-from pyModelChecking.CTLS import LNot as LNot
+from core.validator.pyModelChecking.graph import DiGraph
+from core.validator.pyModelChecking.graph import compute_SCCs
+from core.validator.pyModelChecking.kripke import Kripke
+from core.validator.pyModelChecking.CTLS import LNot as LNot
 
 from .parser import Parser
 
 import sys
 
 # if 'pyModelChecking.CTLS' not in sys.modules:
-import pyModelChecking.CTLS
+import core.validator.pyModelChecking.CTLS
 
 LTL = sys.modules[__name__]
-CTLS = sys.modules['pyModelChecking.CTLS']
+CTLS = sys.modules['core.validator.pyModelChecking.CTLS']
 
 
 def _get_closure(formula):
@@ -129,9 +129,9 @@ def _build_atoms(K, closure):
 
     # this is to avoid issues with the "not X" case
     cl_list = sorted(list(closure), key=(lambda a: a.height
-                                     if not (isinstance(a, CTLS.Not) and
-                                             isinstance(a.subformula(0), CTLS.X))
-                                     else a.height-1))
+    if not (isinstance(a, CTLS.Not) and
+            isinstance(a.subformula(0), CTLS.X))
+    else a.height - 1))
 
     for phi in cl_list:
         Lang = sys.modules[phi.__module__]
@@ -241,7 +241,6 @@ def _is_non_trivial_self_fulfilling(T, C, closure):
 
 
 def _checkE_path_formula(kripke, p_formula):
-
     closure = _get_closure(p_formula)
     T = _Tableu(kripke, closure=closure)
 
@@ -298,6 +297,6 @@ def modelcheck(kripke, formula, parser=None, F=None):
             p_formula = p_formula.get_equivalent_non_fair_formula(fair_label)
             p_formula = And(fair_label, p_formula)
 
-        return set(kripke.states())-_checkE_path_formula(kripke, p_formula)
+        return set(kripke.states()) - _checkE_path_formula(kripke, p_formula)
     except TypeError:
         raise TypeError('expected a LTL formula, got {}'.format(formula))

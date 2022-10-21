@@ -2,11 +2,11 @@ import math
 import time
 from queue import Queue
 
-from core.pyModelChecking import *
-from core.pyModelChecking.CTL import Parser, modelcheck
+from core.validator.pyModelChecking import *
+from core.validator.pyModelChecking.CTL import Parser, modelcheck
 
 
-class Validator:
+class FMValidator:
     def __init__(self, configurator, net):
 
         self.initial_states = configurator.initial_state

@@ -10,9 +10,9 @@ import sys
 from ..language import LNot
 from ..language import get_alphabet, get_symbols
 
-import pyModelChecking.CTLS
+import core.validator.pyModelChecking.CTLS
 
-CTLS = sys.modules['pyModelChecking.CTLS']
+CTLS = sys.modules['core.validator.pyModelChecking.CTLS']
 
 
 class Formula(CTLS.Formula):

@@ -6,16 +6,16 @@
 """
 
 from .language import *
-from pyModelChecking.graph import compute_SCCs
-from pyModelChecking.kripke import Kripke
+from core.validator.pyModelChecking.graph import compute_SCCs
+from core.validator.pyModelChecking.kripke import Kripke
 
-import pyModelChecking.CTLS
+import core.validator.pyModelChecking.CTLS
 
 from .parser import Parser
 
 import sys
 
-CTLS = sys.modules['pyModelChecking.CTLS']
+CTLS = sys.modules['core.validator.pyModelChecking.CTLS']
 
 
 def _init_formula_in(formula, L):
@@ -99,7 +99,7 @@ def _checkEU(kripke, formula, L):
         # the nodes satisfying p_formula.subformula(0).
         # Hence, the former must be added to the
         # investigated subgraph
-        for v in Lphi[1]-subgraph.nodes():
+        for v in Lphi[1] - subgraph.nodes():
             subgraph.add_node(v)
 
         L[formula] = subgraph.get_reachable_set_from(Lphi[1])
