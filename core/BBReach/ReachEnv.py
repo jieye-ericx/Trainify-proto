@@ -1,4 +1,5 @@
 import copy
+import multiprocessing
 import time
 
 import torch
@@ -23,6 +24,67 @@ def create_function(str, max):
     return cal
 
 
+def calculate_reachable_sets(env, initial_bound, time_step, identifier=None):
+    if isinstance(initial_bound, str):
+        initial_bound = str_to_list(initial_bound)
+    assert len(initial_bound) == 2 * env.state_dim
+    bound_list = [initial_bound]
+    st = time.time()
+    t = 0
+    while True:
+        t0 = time.time()
+        bound_list = env.get_next_bound_list(bound_list)
+        min_x1 = math.inf
+        max_x1 = -math.inf
+        min_x2 = math.inf
+        max_x2 = -math.inf
+        for bound in bound_list:
+            min_x1 = min(bound[0], min_x1)
+            max_x1 = max(bound[2], max_x1)
+            min_x2 = min(bound[1], min_x2)
+            max_x2 = max(bound[3], max_x2)
+
+        t1 = time.time()
+        if identifier is None:
+            print(t, '：', len(bound_list), min_x1, max_x1, min_x2, max_x2, t1 - t0)
+        t += 1
+        if t == time_step:
+            if identifier is not None:
+                print(identifier, '：', 'min_x1,', min_x1, 'max_x1,', max_x1, 'min_x2,', min_x2, 'max_x2,', max_x2)
+            break
+    et = time.time()
+    print('Overall Time', et - st)
+    print('seg', env.time_seg, 'over-app', env.time_op, 'agg', env.time_agg)
+    return True
+
+
+def err_call_back(err):
+    print('error---', err)
+
+
+def parallel_cal(env, initial_bound, set_partition_gran, time_step, process_num=4):
+    st = time.time()
+    assert len(initial_bound) == 2 * env.state_dim
+    assert len(set_partition_gran) == env.state_dim
+    sr = [initial_bound[0:env.state_dim], initial_bound[env.state_dim:]]
+    sr_dt = initiate_divide_tool(sr, set_partition_gran)
+    bounds = sr_dt.intersection(initial_bound)
+    print('Number of sub-tasks', len(bounds))
+    results = []
+    pool = multiprocessing.Pool(processes=process_num)
+    cnt = 1
+    for bound in bounds:
+        results.append(
+            pool.apply_async(calculate_reachable_sets, args=(env, bound, time_step, cnt), error_callback=err_call_back))
+        cnt += 1
+    pool.close()
+    pool.join()
+    # for res in results:
+    #     print(res)
+    et = time.time()
+    print('Time of Parallel Calculation:', et - st)
+
+
 class ReachEnv():
     def __init__(self, name, env_config={}, divide_tool=None, network=None):
         self.name = name
@@ -30,10 +92,11 @@ class ReachEnv():
         self.d = ["x[1] + x[2]*0.1", "x[2]+(x[0]*x[2]*x[2]-x[1])*0.1"]
         self.cd = ["x[0] + x[1]*0.1", "x[1]+(action*x[1]*x[1]-x[0])*0.1"]
         self.verify_func = []
-        self.create_verify_func()
+        # self.create_verify_func()
         self.divide_tool = divide_tool
         self.network = network
         self.standard = [0.0001, 0.0001]
+        self.state_dim = len(self.cd)
 
         self.time_seg = 0
         self.time_agg = 0
@@ -44,35 +107,35 @@ class ReachEnv():
         self.time_agg = 0
         self.time_op = 0
 
-    def create_verify_func(self):
-        labels = [
-            ['sin', 'math.sin'],
-            ['cos', 'math.cos'],
-            ['tan', 'math.tan'],
-            ['tanh', 'math.tanh']
-        ]
-
-        def from_function(str, max):
-            def cal(x):
-                if max:
-                    return -eval(str)
-                else:
-                    return eval(str)
-
-            return cal
-
-        for i, str in enumerate(self.d):
-            for a in labels:
-                reg = re.compile(re.escape(a[0]), re.IGNORECASE)
-                self.d[i] = reg.sub(a[1], self.d[i])
-
-            setattr(self, self.xnames[i] + '_maximum',
-                    from_function(self.d[i], True))
-            setattr(self, self.xnames[i] + '_minimum',
-                    from_function(self.d[i], False))
-
-            self.verify_func.append(from_function(self.d[i], False))
-            self.verify_func.append(from_function(self.d[i], True))
+    # def create_verify_func(self):
+    #     labels = [
+    #         ['sin', 'math.sin'],
+    #         ['cos', 'math.cos'],
+    #         ['tan', 'math.tan'],
+    #         ['tanh', 'math.tanh']
+    #     ]
+    #
+    #     def from_function(str, max):
+    #         def cal(x):
+    #             if max:
+    #                 return -eval(str)
+    #             else:
+    #                 return eval(str)
+    #
+    #         return cal
+    #
+    #     for i, str in enumerate(self.d):
+    #         for a in labels:
+    #             reg = re.compile(re.escape(a[0]), re.IGNORECASE)
+    #             self.d[i] = reg.sub(a[1], self.d[i])
+    #
+    #         setattr(self, self.xnames[i] + '_maximum',
+    #                 from_function(self.d[i], True))
+    #         setattr(self, self.xnames[i] + '_minimum',
+    #                 from_function(self.d[i], False))
+    #
+    #         self.verify_func.append(from_function(self.d[i], False))
+    #         self.verify_func.append(from_function(self.d[i], True))
 
     def get_next_bound_list(self, bound_list):
         res_list = []
@@ -140,6 +203,7 @@ class ReachEnv():
         offset = 0
         scala = 1
         self.action = (action[0] - offset) * scala
+        next_bounds = self.execute_action(current)
 
         # action 通过约束传递求解很慢
         # mid_point = [self.action]
@@ -174,6 +238,31 @@ class ReachEnv():
         #     next_bounds[i] = l
         #     next_bounds[i + half_dim] = r
 
+        # 使用区间运算
+        # interval_bound = []
+        # for j in range(half_dim):
+        #     ele = interval[lb[j], ub[j]]
+        #     interval_bound.append(ele)
+        #
+        # next_bounds = [0 for i in range(dim)]
+        # for i in range(half_dim):
+        #     fun_str = self.cd[i]
+        #     fun_str = fun_str.replace('action', str(self.action))
+        #     lb_func = create_function(fun_str, False)
+        #     next_interval_bound = lb_func(interval_bound)
+        #     l = next_interval_bound[0][0]
+        #     r = next_interval_bound[0][1]
+        #     # TODO state_bound
+        #     l = np.clip(l, -2, 2)
+        #     r = np.clip(r, -2, 2)
+        #     next_bounds[i] = l
+        #     next_bounds[i + half_dim] = r
+
+        return next_bounds
+
+    def execute_action(self, current):
+        dim = len(current)
+        half_dim = int(dim / 2)
         # 将action直接通过字符串替换成常数，避免添加action的约束
         mid_point = []
         lb = []
@@ -207,27 +296,6 @@ class ReachEnv():
             r = np.clip(r, -2, 2)
             next_bounds[i] = l
             next_bounds[i + half_dim] = r
-
-        # 使用区间运算
-        # interval_bound = []
-        # for j in range(half_dim):
-        #     ele = interval[lb[j], ub[j]]
-        #     interval_bound.append(ele)
-        #
-        # next_bounds = [0 for i in range(dim)]
-        # for i in range(half_dim):
-        #     fun_str = self.cd[i]
-        #     fun_str = fun_str.replace('action', str(self.action))
-        #     lb_func = create_function(fun_str, False)
-        #     next_interval_bound = lb_func(interval_bound)
-        #     l = next_interval_bound[0][0]
-        #     r = next_interval_bound[0][1]
-        #     # TODO state_bound
-        #     l = np.clip(l, -2, 2)
-        #     r = np.clip(r, -2, 2)
-        #     next_bounds[i] = l
-        #     next_bounds[i + half_dim] = r
-
         return next_bounds
 
 
@@ -242,52 +310,16 @@ if __name__ == "__main__":
     # test_func = create_function("x[1]+(-1.9954697*x[1]*x[1]-x[0])*0.1", False)
     # tt = test_func(x)
     # self.network.load_state_dict(torch.load(pt_file0))
-    pt_file = "b1_abs-actor_[0.02, 0.02]_2_20.pt"
+    pt_file = "b1_abs-actor_[0.05, 0.05]_2_20.pt"
     network = ddpgActor(4, 20, 1)
     network.load_state_dict(torch.load(pt_file))
     state_space = [[-2.5, -2.5], [2.5, 2.5]]
-    initial_intervals = [0.02, 0.02]
+    initial_intervals = [0.05, 0.05]
     divide_tool = initiate_divide_tool(state_space, initial_intervals)
     b1 = ReachEnv("b1_env", divide_tool=divide_tool, network=network)
-
     r = [0.8, 0.5, 0.9, 0.6]
     # r = [0.8, 0.51, 0.81, 0.52]
     # r = [0.89, 0.59, 0.9, 0.6]
-    r = [0.89, 0.53, 0.9, 0.54]
-    t = 0
-    interval_num_agg = []
-
-    st = time.time()
-    bound_list = [r]
-    while True:
-        t0 = time.time()
-        bound_list = b1.get_next_bound_list(bound_list)
-        min_x1 = 100
-        max_x1 = -100
-        min_x2 = 100
-        max_x2 = -100
-
-        for bound in bound_list:
-            min_x1 = min(bound[0], min_x1)
-            max_x1 = max(bound[2], max_x1)
-            min_x2 = min(bound[1], min_x2)
-            max_x2 = max(bound[3], max_x2)
-
-        t1 = time.time()
-        # print(t, '：', r[2], r[6])
-        print(t, '：', len(bound_list), min_x1, max_x1, min_x2, max_x2, t1 - t0)
-        interval_num_agg.append(len(bound_list))
-
-        t += 1
-        if t == 60:
-            break
-    et = time.time()
-    # np.save('interval_number_no_agg', arr=interval_num_agg)
-    print(et - st)
-    print('seg', b1.time_seg, 'over-app', b1.time_op, 'agg', b1.time_agg)
-
-    # cons = ({'type': 'eq', 'fun': lambda x: x[0] + 0.02639258}, {'type': 'ineq', 'fun': lambda x: 0.9 - x[1]},
-    #         {'type': 'ineq', 'fun': lambda x: x[1] - 0.89}, {'type': 'ineq', 'fun': lambda x: 0.54 - x[2]},
-    #         {'type': 'ineq', 'fun': lambda x: x[2] - 0.53})
-
-    print('test')
+    # r = [0.89, 0.53, 0.9, 0.54]
+    calculate_reachable_sets(b1, r, 60)
+    parallel_cal(b1, r, [0.05, 0.1], 60, process_num=2)
