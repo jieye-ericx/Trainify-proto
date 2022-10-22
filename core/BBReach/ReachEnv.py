@@ -15,6 +15,16 @@ from interval import interval, inf, imath
 
 
 def create_function(str, max):
+    labels = [
+        ['sin', 'math.sin'],
+        ['cos', 'math.cos'],
+        ['tan', 'math.tan'],
+        ['tanh', 'math.tanh']
+    ]
+    for a in labels:
+        reg = re.compile(re.escape(a[0]), re.IGNORECASE)
+        str = reg.sub(a[1], str)
+
     def cal(x):
         if max:
             return -eval(str)
@@ -27,8 +37,9 @@ def create_function(str, max):
 def calculate_reachable_sets(env, initial_bound, time_step, identifier=None):
     if isinstance(initial_bound, str):
         initial_bound = str_to_list(initial_bound)
-    assert len(initial_bound) == 2 * env.state_dim
+    assert len(initial_bound) == 2 * len(env.cd)
     bound_list = [initial_bound]
+    env.timer_reset()
     st = time.time()
     t = 0
     while True:
@@ -40,9 +51,9 @@ def calculate_reachable_sets(env, initial_bound, time_step, identifier=None):
         max_x2 = -math.inf
         for bound in bound_list:
             min_x1 = min(bound[0], min_x1)
-            max_x1 = max(bound[2], max_x1)
+            max_x1 = max(bound[0 + len(env.cd)], max_x1)
             min_x2 = min(bound[1], min_x2)
-            max_x2 = max(bound[3], max_x2)
+            max_x2 = max(bound[1 + len(env.cd)], max_x2)
 
         t1 = time.time()
         if identifier is None:
@@ -64,9 +75,10 @@ def err_call_back(err):
 
 def parallel_cal(env, initial_bound, set_partition_gran, time_step, process_num=4):
     st = time.time()
-    assert len(initial_bound) == 2 * env.state_dim
-    assert len(set_partition_gran) == env.state_dim
-    sr = [initial_bound[0:env.state_dim], initial_bound[env.state_dim:]]
+    half_dim = len(env.cd)
+    assert len(initial_bound) == 2 * len(env.cd)
+    assert len(set_partition_gran) == len(env.cd)
+    sr = [initial_bound[0:half_dim], initial_bound[half_dim:]]
     sr_dt = initiate_divide_tool(sr, set_partition_gran)
     bounds = sr_dt.intersection(initial_bound)
     print('Number of sub-tasks', len(bounds))
@@ -89,13 +101,15 @@ class ReachEnv():
     def __init__(self, name, env_config={}, divide_tool=None, network=None):
         self.name = name
         self.xnames = ['x1', 'x2']
-        self.d = ["x[1] + x[2]*0.1", "x[2]+(x[0]*x[2]*x[2]-x[1])*0.1"]
+        # self.d = ["x[1] + x[2]*0.1", "x[2]+(x[0]*x[2]*x[2]-x[1])*0.1"]
         self.cd = ["x[0] + x[1]*0.1", "x[1]+(action*x[1]*x[1]-x[0])*0.1"]
+        self.state_space = [[-2, -2], [2, 2]]
         self.verify_func = []
         # self.create_verify_func()
         self.divide_tool = divide_tool
         self.network = network
         self.standard = [0.0001, 0.0001]
+        self.tau = 0.1
         self.state_dim = len(self.cd)
 
         self.time_seg = 0
@@ -198,8 +212,6 @@ class ReachEnv():
 
         s0 = torch.tensor(original, dtype=torch.float).unsqueeze(0)
         action = self.network(s0).squeeze(0).detach().numpy()
-        t = 0.1
-        self.tau = t
         offset = 0
         scala = 1
         self.action = (action[0] - offset) * scala
@@ -291,9 +303,8 @@ class ReachEnv():
             l = lb_func(l.x)
             r = minimize(ub_func, x0=mid_point, method='COBYLA', constraints=cons_list)
             r = -ub_func(r.x)
-            # TODO state_bound
-            l = np.clip(l, -2, 2)
-            r = np.clip(r, -2, 2)
+            l = np.clip(l, self.state_space[0][i], self.state_space[1][i])
+            r = np.clip(r, self.state_space[0][i], self.state_space[1][i])
             next_bounds[i] = l
             next_bounds[i + half_dim] = r
         return next_bounds
@@ -310,16 +321,33 @@ if __name__ == "__main__":
     # test_func = create_function("x[1]+(-1.9954697*x[1]*x[1]-x[0])*0.1", False)
     # tt = test_func(x)
     # self.network.load_state_dict(torch.load(pt_file0))
-    pt_file = "b1_abs-actor_[0.05, 0.05]_2_20.pt"
-    network = ddpgActor(4, 20, 1)
+
+    # B1
+    # pt_file = "b1_abs-actor_[0.05, 0.05]_2_20.pt"
+    # network = ddpgActor(4, 20, 1)
+    # network.load_state_dict(torch.load(pt_file))
+    # state_space = [[-2.5, -2.5], [2.5, 2.5]]
+    # initial_intervals = [0.05, 0.05]
+    # divide_tool = initiate_divide_tool(state_space, initial_intervals)
+    # b1 = ReachEnv("b1_env", divide_tool=divide_tool, network=network)
+    # r = [0.8, 0.5, 0.9, 0.6]
+    # # r = [0.89, 0.53, 0.9, 0.54]
+    # calculate_reachable_sets(b1, r, 60)
+    # parallel_cal(b1, r, [0.05, 0.1], 60, process_num=2)
+
+    # B4
+    pt_file = "b4_abs-actor_[0.5, 0.5, 0.5]_2_20.pt"
+    network = ddpgActor(6, 20, 1)
     network.load_state_dict(torch.load(pt_file))
-    state_space = [[-2.5, -2.5], [2.5, 2.5]]
-    initial_intervals = [0.05, 0.05]
+    state_space = [[-2.5, -2.5, -2.5], [2.5, 2.5, 2.5]]
+    initial_intervals = [0.5, 0.5, 0.5]
     divide_tool = initiate_divide_tool(state_space, initial_intervals)
-    b1 = ReachEnv("b1_env", divide_tool=divide_tool, network=network)
-    r = [0.8, 0.5, 0.9, 0.6]
-    # r = [0.8, 0.51, 0.81, 0.52]
-    # r = [0.89, 0.59, 0.9, 0.6]
-    # r = [0.89, 0.53, 0.9, 0.54]
-    calculate_reachable_sets(b1, r, 60)
-    parallel_cal(b1, r, [0.05, 0.1], 60, process_num=2)
+    b4 = ReachEnv("b4_env", divide_tool=divide_tool, network=network)
+    b4.state_space = state_space
+    b4.xnames = ['x1', 'x2', 'x3']
+    b4.cd = ['x[0] + (-x[0] + x[1] - x[2]) * 0.05', 'x[1] + (-x[0] * (x[2] + 1) - x[1]) * 0.05',
+             'x[2] + (-x[0] + action) * 0.05']
+    b4.standard = [0.001, 0.0001, 0.0001]
+    r = [0.25, 0.08, 0.25, 0.27, 0.1, 0.27]
+    calculate_reachable_sets(b4, r, 15)
+    parallel_cal(b4, r, [0.01, 0.01, 0.02], 15, process_num=2)
