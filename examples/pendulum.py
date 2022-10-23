@@ -1,10 +1,10 @@
 import numpy as np
 
 # 获取文件所在的当前路径
-from core.utils import str_to_list
-from core.env import Pendulum
-from core.agent import DDPGAgent
-from core import Trainify
+from trainify.utils import str_to_list
+from trainify.env import Pendulum
+from trainify.agent import DDPGAgent
+from trainify import Trainify
 from evaluate.evaluate_pendulum import evaluate_pendulum
 
 if __name__ == "__main__":
@@ -24,6 +24,7 @@ if __name__ == "__main__":
         'tau': 0.02,
         'capacity': 10000,
         'batch_size': 32,
+        'hidden_size': 128
     }
 
     verify_config = {
@@ -34,6 +35,7 @@ if __name__ == "__main__":
         'step_num': 500,
         'episode_num': 2000
     }
+
     t = Trainify(
         env_config=env_config,
         env_class=Pendulum,
@@ -43,7 +45,9 @@ if __name__ == "__main__":
         verify_config=verify_config,
         experiment_name="test_ddpg_pendulum",
     )
+    
     t.train_agent(train_config)
+
     # reward_list = []
     # for episode in range(2000):
     #     episode_reward = 0
