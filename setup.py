@@ -29,5 +29,6 @@ setuptools.setup(
         'matplotlib==3.4.3',
         'numpy==1.20.0',
         'scipy==1.8.1',
+        'tensorboardX==2.5.1'
     ]
 )
