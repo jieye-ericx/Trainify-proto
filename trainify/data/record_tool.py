@@ -2,7 +2,7 @@ import os
 import time
 import sys
 import torch
-from tensorboardX import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 import subprocess
 
 ROOT_PROJECT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -18,8 +18,10 @@ class Recorder:
         self.experiment_name = experiment_name
         self.data_dir_name = data_dir_name
         self.data_path = os.path.join(ROOT_DATA_PATH, data_dir_name)
+        self.data_path_tensorboard = self.data_path + '/tensorboard'
         self._create_dir(self.data_path)
-        self.title_reward = {}
+        self.reward = {}
+        self.temp_name = ''
 
     def _create_dir(self, path):
         """
@@ -33,28 +35,39 @@ class Recorder:
         return path
 
     def create_data_result(self, title):
-        self.title_reward.update(
-            {title: {'reward_list': []}}
-        )
+        self.temp_name = title
+        self.reward.update({title: {'name': title, 'reward_list': []}})
 
     def get_data_path(self):
         return self.data_path
 
-    def add_reward(self, title, reward):
-        self.title_reward[title]['reward_list'].append(reward)
+    def add_reward(self, reward, title=''):
+        if title == '':
+            title = self.temp_name
+        self.reward[title]['reward_list'].append(reward)
 
-    def get_reward_list(self, title):
-        return self.title_reward[title]['reward_list']
+    def get_reward_list(self, title=''):
+        if title == '':
+            title = self.temp_name
+        return self.reward[title]['reward_list']
 
-    def writeAll2TensorBoard(self):
+    def get_reward(self, title=''):
+        if title == '':
+            title = self.temp_name
+        return self.reward[title]
+
+    def writeAll2TensorBoard(self, title=''):
         """
         :param title: str,数据标题
         :return:
         """
-        writer = SummaryWriter(log_dir=self.data_path)
-        for title in self.title_reward.keys():
-            for i in range(len(self.title_reward[title]['reward_list'])):
-                writer.add_scalar(tag=title, scalar_value=self.title_reward[title]['reward_list'][i], global_step=i)
+        if title == '':
+            title = self.temp_name
+
+        writer = SummaryWriter(log_dir=self.data_path_tensorboard)
+        for title in self.reward.keys():
+            for i in range(len(self.reward[title]['reward_list'])):
+                writer.add_scalar(tag=title, scalar_value=self.reward[title]['reward_list'][i], global_step=i)
         writer.close()
 
     def openTensorBoard(self):

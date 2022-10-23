@@ -8,7 +8,7 @@
 
    `pip install Trainify-proto`
 
-   > 如果想体验最新功能，也可安装测试版本
+   > 如果想体验最新功能，可以安装测试版本
    >
    > pip install -i https://test.pypi.org/simple/ Trainify-proto
 
@@ -36,6 +36,17 @@
 
 `utils` 工具函数
 
+
+
+### 查看训练/验证结果
+
+```bash
+# 先安装tensorboard
+pip install tensorboard
+# log_dir替换为需要查看的实验目录
+tensorboard --logdir=log_dir
+```
+
 ### 开发内容
 
 1. 环境与状态抽象
@@ -61,9 +72,11 @@
 
 ## 发布
 
-切换到`publish`分支
+切换到`publish`分支：`git checkout publish`
 
-`python setup.py sdist bdist_wheel`
+打包：`python setup.py sdist bdist_wheel`
 
-`python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*`
+测试版本：`python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*`
+
+正式版本：`python -m twine upload dist/*`
 

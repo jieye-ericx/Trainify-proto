@@ -50,7 +50,6 @@ class Critic(nn.Module):
 
 
 class DDPGAgent(object):
-    # def __init__(self, divide_tool, env):
     def __init__(self, env, config):
         self.config = config
         self.originEnv = env
@@ -102,8 +101,6 @@ class DDPGAgent(object):
 
     def act(self, s0):
         abs = str_to_list(s0)
-        # abs = str_to_list(self.divide_tool.get_abstract_state(s0))
-        # s0 = torch.tensor(s0, dtype=torch.float).unsqueeze(0)
         s0 = torch.tensor(abs, dtype=torch.float).unsqueeze(0)
         a0 = self.actor(s0).squeeze(0).detach().numpy()
         return a0

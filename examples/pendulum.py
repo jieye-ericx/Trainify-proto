@@ -45,7 +45,7 @@ if __name__ == "__main__":
         verify_config=verify_config,
         experiment_name="test_ddpg_pendulum",
     )
-    
+
     t.train_agent(train_config)
 
     # reward_list = []
