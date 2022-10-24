@@ -91,14 +91,13 @@ class Trainify:
                 abs = abs_next
             if episode % 5 == 4:
                 self.save_model(['actor', 'critic', 'actor_target', 'critic_target'])
-            self.recorder.add_reward(name, episode_reward)
+            self.recorder.add_reward(episode_reward)
             print('episode: ', episode, ' episode_reward: ', episode_reward)
 
-            if episode >= 10 and np.min(self.recorder.get_reward_list(name)[-3:]) > -3:
-                #     min_reward = evaluate(agent)
-                #     if min_reward > -30:
+            if episode >= 10 and np.min(self.recorder.get_reward_list()[-3:]) > -3:
                 self.save_model(['actor', 'critic', 'actor_target', 'critic_target'])
                 break
+        self.recorder.writeAll2TensorBoard()
 
     def create_cal_state_func(self, config, Env):
         labels = [
