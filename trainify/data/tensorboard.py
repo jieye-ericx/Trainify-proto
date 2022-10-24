@@ -1,6 +1,6 @@
 from torch.utils.tensorboard import SummaryWriter
 import subprocess
-
+import sys
 
 def writeTensorBoard(directory, title, data):
     """
@@ -20,6 +20,7 @@ def openTensorBoard(path, directory):
     :param directory: tensorboard文件的存储目录名称
     :return:
     """
+    assert sys.platform[0:3] == "win", "该操作系统不为Windows"
     cmds = [path.split("\\")[0], "cd "+path, "tensorboard --logdir="+directory]
     p = subprocess.Popen('cmd.exe', stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
