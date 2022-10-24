@@ -1,5 +1,3 @@
-import os
-import sys
 import random
 
 import numpy as np
@@ -8,9 +6,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from trainify.utils import str_to_list
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(BASE_DIR)
 
 
 class Actor(nn.Module):

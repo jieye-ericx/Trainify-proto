@@ -2,7 +2,7 @@ import os
 import time
 import sys
 import torch
-from torch.utils.tensorboard import SummaryWriter
+from tensorboardX import SummaryWriter
 import subprocess
 
 ROOT_PROJECT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
