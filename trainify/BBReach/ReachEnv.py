@@ -9,6 +9,7 @@ import numpy as np
 
 from trainify.abstract.divide_tool import str_to_list, max_min_clip, combine_bound_list, near_bound, \
     initiate_divide_tool
+from draw import *
 import re
 
 from trainify.agent import Actor as ddpgActor
@@ -38,8 +39,10 @@ def create_function(str, max):
 def calculate_reachable_sets(env, initial_bound, time_step, identifier=None):
     if isinstance(initial_bound, str):
         initial_bound = str_to_list(initial_bound)
-    assert len(initial_bound) == 2 * len(env.cd)
+    actual_dim = len(env.cd)
+    assert len(initial_bound) == 2 * actual_dim
     bound_list = [initial_bound]
+    res_list = [[initial_bound[0], initial_bound[1], initial_bound[0 + actual_dim], initial_bound[1 + actual_dim]]]
     env.timer_reset()
     st = time.time()
     t = 0
@@ -52,9 +55,10 @@ def calculate_reachable_sets(env, initial_bound, time_step, identifier=None):
         max_x2 = -math.inf
         for bound in bound_list:
             min_x1 = min(bound[0], min_x1)
-            max_x1 = max(bound[0 + len(env.cd)], max_x1)
+            max_x1 = max(bound[0 + actual_dim], max_x1)
             min_x2 = min(bound[1], min_x2)
-            max_x2 = max(bound[1 + len(env.cd)], max_x2)
+            max_x2 = max(bound[1 + actual_dim], max_x2)
+        res_list.append([min_x1, min_x2, max_x1, max_x2])
 
         t1 = time.time()
         if identifier is None:
@@ -67,7 +71,7 @@ def calculate_reachable_sets(env, initial_bound, time_step, identifier=None):
     et = time.time()
     print('Overall Time', et - st)
     print('seg', env.time_seg, 'over-app', env.time_op, 'agg', env.time_agg)
-    return True
+    return np.array(res_list)
 
 
 def err_call_back(err):
@@ -92,10 +96,21 @@ def parallel_cal(env, initial_bound, set_partition_gran, time_step, process_num=
         cnt += 1
     pool.close()
     pool.join()
-    # for res in results:
-    #     print(res)
+    parallel_res_list = []
+    for res in results:
+        p_list = res.get()
+        parallel_res_list.append(p_list)
+        # print(res)
+    dim_list = list(range(4))
+    parallel_res_list =np.array(parallel_res_list)
+    max_res = parallel_res_list.max(axis=0)
+    max_res = np.delete(max_res, dim_list[0:2], axis=1)
+    min_res = parallel_res_list.min(axis=0)
+    min_res = np.delete(min_res, dim_list[2:4], axis=1)
+    r = np.append(min_res, max_res, axis=1)
     et = time.time()
     print('Time of Parallel Calculation:', et - st)
+    return np.array(r)
 
 
 class ReachEnv():
@@ -337,18 +352,21 @@ if __name__ == "__main__":
     # parallel_cal(b1, r, [0.05, 0.1], 60, process_num=2)
 
     # B4
-    pt_file = "b4_abs-actor_[0.5, 0.5, 0.5]_2_20.pt"
-    network = ddpgActor(6, 20, 1)
-    network.load_state_dict(torch.load(pt_file))
     state_space = [[-2.5, -2.5, -2.5], [2.5, 2.5, 2.5]]
     initial_intervals = [0.5, 0.5, 0.5]
+    pt_file = "b4_abs-actor_" + str(initial_intervals) + "_2_20.pt"
+    network = ddpgActor(6, 20, 1)
+    network.load_state_dict(torch.load(pt_file))
     divide_tool = initiate_divide_tool(state_space, initial_intervals)
     b4 = ReachEnv("b4_env", divide_tool=divide_tool, network=network)
     b4.state_space = state_space
     b4.xnames = ['x1', 'x2', 'x3']
-    b4.cd = ['x[0] + (-x[0] + x[1] - x[2]) * 0.05', 'x[1] + (-x[0] * (x[2] + 1) - x[1]) * 0.05',
-             'x[2] + (-x[0] + action) * 0.05']
+    b4.cd = ['x[0] + (-x[0] + x[1] - x[2]) * 0.02', 'x[1] + (-x[0] * (x[2] + 1) - x[1]) * 0.02',
+             'x[2] + (-x[0] + action) * 0.02']
     b4.standard = [0.001, 0.0001, 0.0001]
     r = [0.25, 0.08, 0.25, 0.27, 0.1, 0.27]
-    calculate_reachable_sets(b4, r, 15)
-    parallel_cal(b4, r, [0.01, 0.01, 0.02], 15, process_num=2)
+    res_list = calculate_reachable_sets(b4, r, 35)
+    draw_box(res_list, False)
+    parallel_list = parallel_cal(b4, r, [0.01, 0.01, 0.02], 35, process_num=2)
+    draw_box(parallel_list)
+    print('finished')
