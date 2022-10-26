@@ -1,6 +1,7 @@
 from torch.utils.tensorboard import SummaryWriter
 import subprocess
-import sys
+import os
+import threading
 
 def writeTensorBoard(directory, title, data):
     """
@@ -14,17 +15,35 @@ def writeTensorBoard(directory, title, data):
         writer.add_scalar(tag= title, scalar_value= data[i], global_step=i)
     writer.close()
 
-def openTensorBoard(path, directory):
+def _openTensorBoard(path, directory):
     """
     :param path: 当前工程路径
     :param directory: tensorboard文件的存储目录名称
     :return:
     """
-    assert sys.platform[0:3] == "win", "该操作系统不为Windows"
-    cmds = [path.split("\\")[0], "cd "+path, "tensorboard --logdir="+directory]
-    p = subprocess.Popen('cmd.exe', stdin=subprocess.PIPE,
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    for cmd in cmds:
-        p.stdin.write((cmd + "\n").encode(encoding='UTF-8', errors='strict'))
-    p.stdin.close()
-    print(p.stdout.read())
+    if os.name == "nt":
+        # windows
+        cmds = [path.split("\\")[0], "cd " + path, "tensorboard --logdir=" + directory]
+        p = subprocess.Popen('cmd.exe', stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        for cmd in cmds:
+            p.stdin.write((cmd + "\n").encode(encoding='UTF-8', errors='strict'))
+        p.stdin.close()
+        print(p.stdout.read())
+    elif os.name == "posix":
+        # linux
+        cmds = ["cd " + path, "tensorboard --logdir=" + directory]
+        p = subprocess.Popen('shell', stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        for cmd in cmds:
+            p.stdin.write((cmd + "\n").encode(encoding='UTF-8', errors='strict'))
+        p.stdin.close()
+        print(p.stdout.read())
+    else:
+        # mac
+        pass
+
+def openTensorBoard(path, directory):
+    t1 = threading.Thread(target=_openTensorBoard, args=(path,directory,))
+    t1.start()
+
