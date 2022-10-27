@@ -7,39 +7,16 @@ import torch.nn.functional as F
 import torch.optim as optim
 from trainify.utils import str_to_list
 
-def parse_cfg(cfgfile):
-    """
-    解析cfg文件
 
-    """
 
-    file = open(cfgfile, 'r')
-    lines = file.read().split('\n')  # store the lines in a list
-    lines = [x for x in lines if len(x) > 0]  # get read of the empty lines
-    lines = [x for x in lines if x[0] != '#']  # get rid of comments
-    lines = [x.rstrip().lstrip() for x in lines]  # get rid of fringe whitespaces
-
-    block = {}
-    blocks = []
-
-    for line in lines:
-        if line[0] == "[":  # This marks the start of a new block
-            if len(block) != 0:  # If block is not empty, implies it is storing values of previous block.
-                blocks.append(block)  # add it the blocks list
-                block = {}  # re-init the block
-            block["type"] = line[1:-1].rstrip()  # remove the fisrt and last element
-        else:
-            key, value = line.split("=")
-            block[key.rstrip()] = value.lstrip()
-    blocks.append(block)
-    return blocks
-
-def create_modules(blocks):
+def create_modules(agent_config):
     """
     根据解析cfg文件的结果来构造模块
     :param blocks:
     :return:
     """
+    blocks = agent_config.get("modules")
+    assert blocks is not None , "没有给定actor网络参数"
     module = nn.Sequential()
 
     for index, x in enumerate(blocks[:]):
@@ -47,12 +24,11 @@ def create_modules(blocks):
         # If it's a linear layer
         if (x["type"] == "linear"):
             # Get the info about the layer
-
-            in_features = int(x["in_features"])
-            out_features = int(x["out_features"])
-            mean = float(x["mean"])
-            std = float(x["std"])
-            bias_zero = bool(x["bias_zero"])
+            in_features = x["in_features"]
+            out_features = x["out_features"]
+            mean = x["mean"]
+            std = x["std"]
+            bias_zero = x["bias_zero"]
             activation = x["activation"]
 
 
@@ -73,10 +49,9 @@ def create_modules(blocks):
     return module
 
 class Actor(nn.Module):
-    def __init__(self, cfgfile):
+    def __init__(self, agent_config):
         super(Actor, self).__init__()
-        self.blocks = parse_cfg(cfgfile)
-        self.module_sequential = create_modules(self.blocks)
+        self.module_sequential = create_modules(agent_config)
 
     def forward(self, x):
         return self.module_sequential(x)
@@ -199,5 +174,37 @@ class DDPGAgent(object):
         soft_update(self.actor_target, self.actor, self.tau)
 
 if __name__ == '__main__':
-    act = Actor("./cfg/actor.cfg")
+
+    agent_config = {
+        "modules" : [
+            {
+                "type" : "linear",
+                "in_features": 8,
+                "out_features": 8,
+                "mean": 0,
+                "std": 0.1,
+                "bias_zero": True,
+                "activation":"tanh",
+            },
+            {
+                "type": "linear",
+                "in_features": 8,
+                "out_features": 8,
+                "mean": 0,
+                "std": 0.1,
+                "bias_zero": True,
+                "activation": "tanh",
+            },
+            {
+                "type": "linear",
+                "in_features": 8,
+                "out_features": 2,
+                "mean": 0,
+                "std": 0.1,
+                "bias_zero": True,
+                "activation": None,
+            },
+        ]
+    }
+    act = Actor(agent_config)
     print(act)
