@@ -16,6 +16,39 @@ from trainify.agent import Actor as ddpgActor
 from interval import interval, inf, imath
 
 
+def do_BBReach(env_config, verify_config, actor_network, recorder):
+    env_config = {
+        "dim": 3,
+        "states_name": ['x1', 'x2', 'x3'],
+        "state_space": [[-2.5, -2.5, -2.5], [2.5, 2.5, 2.5]],
+        "abs_initial_intervals": [0.5, 0.5, 0.5],
+        "state_key_dim": [0, 1],
+        "dynamics": ['x[0] + (-x[0] + x[1] - x[2]) * 0.02', 'x[1] + (-x[0] * (x[2] + 1) - x[1]) * 0.02',
+                     'x[2] + (-x[0] + action) * 0.02'],
+    }
+    verify_config = {
+        "distance_threshold": [0.001, 0.0001, 0.0001],
+        "initial_set": [0.25, 0.08, 0.25, 0.27, 0.1, 0.27],
+        "max_step": 35,
+        "initial_set_partition": [0.01, 0.01, 0.02]
+    }
+    divide_tool = initiate_divide_tool(env_config['state_space'], env_config['abs_initial_intervals'])
+    reach_env = ReachEnv("b4_env", divide_tool=divide_tool, network=actor_network)
+    reach_env.state_space = env_config['state_space']
+    reach_env.xnames = env_config['states_name']
+    reach_env.cd = env_config['dynamics']
+    # TODO
+    reach_env.standard = verify_config['distance_threshold']
+    # r = [0.25, 0.08, 0.25, 0.27, 0.1, 0.27]
+    res_list = calculate_reachable_sets(reach_env, verify_config['initial_set'], verify_config['max_step'])
+    draw_box(res_list, False)
+    parallel_list = parallel_cal(reach_env, r, verify_config['initial_set_partition'], verify_config['max_step'], process_num=2)
+    draw_box(parallel_list)
+    print('finished')
+
+    return 0
+
+
 def create_function(str, max):
     labels = [
         ['sin', 'math.sin'],
@@ -102,7 +135,7 @@ def parallel_cal(env, initial_bound, set_partition_gran, time_step, process_num=
         parallel_res_list.append(p_list)
         # print(res)
     dim_list = list(range(4))
-    parallel_res_list =np.array(parallel_res_list)
+    parallel_res_list = np.array(parallel_res_list)
     max_res = parallel_res_list.max(axis=0)
     max_res = np.delete(max_res, dim_list[0:2], axis=1)
     min_res = parallel_res_list.min(axis=0)
