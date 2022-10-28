@@ -13,11 +13,16 @@ class Recorder:
     def __init__(self,
                  experiment_name,
                  data_dir_name,
+                 log_path
                  ):
         print('Recorder init')
         self.experiment_name = experiment_name
         self.data_dir_name = data_dir_name
-        self.data_path = os.path.join(ROOT_DATA_PATH, data_dir_name)
+        if log_path is None:
+            self.data_path = os.path.join(ROOT_DATA_PATH, data_dir_name)
+        else:
+            self.data_path = log_path
+        # print(self.data_path)
         self.data_path_tensorboard = self.data_path + '/tensorboard'
         self._create_dir(self.data_path)
         self.reward = {}

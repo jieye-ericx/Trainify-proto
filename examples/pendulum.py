@@ -72,7 +72,8 @@ if __name__ == "__main__":
 
     train_config = {
         'step_num': 500,
-        'episode_num': 2000
+        'episode_num': 2000,
+        'reward_threshold': -3,
     }
 
 

@@ -23,6 +23,7 @@ class Trainify:
                  log_dir='',
                  experiment_name="default_name",
                  on_episode_end=None,
+                 log_path=None
                  ):
         self.env_config = env_config
         self.env_class = env_class
@@ -36,7 +37,7 @@ class Trainify:
         if log_dir == '':
             log_dir = self.experiment_name_with_time
         self.log_dir = log_dir
-        self.recorder = Recorder(experiment_name=self.experiment_name, data_dir_name=log_dir)
+        self.recorder = Recorder(experiment_name=self.experiment_name, data_dir_name=log_dir, log_path=log_path)
 
         self._np_state_space = np.array(self.env_config['state_space'])
         # Dict(x1:Box([-1.5], [1.5], (1,), float32), x2:Box([-1.5], [1.5], (1,), float32), x3:Box([-10.], [10.], (1,), float32))
@@ -72,6 +73,7 @@ class Trainify:
     #     res={imgPath:/Users/ericx/PycharmProjects/Trainify-proto/data/test_ddpg_pendulum_20221025_155240/reachimgs}
 
     def verify_cegar(self, verify_env=PendulumEnv, train_func=None):
+        print('Trainify 训练完毕 开始验证')
         if not self.verify:
             print('Trainify 初始化Trainify时verify未设置为True，请重新初始化')
             return
@@ -88,6 +90,7 @@ class Trainify:
     def train_agent(self, config={'step_num': 500, 'episode_num': 2000}, name=''):
         step_num = config['step_num']
         episode_num = config['episode_num']
+        reward_threshold = config['reward_threshold']
         if name == '': name = 'default_name' + time.strftime("_%Y%m%d_%H%M%S", time.localtime())
         self.recorder.create_data_result(name)
         for episode in range(episode_num):
@@ -104,16 +107,17 @@ class Trainify:
                 self.agent.learn()
                 s = s_next
                 abs = abs_next
+                if done: break
             if episode % 5 == 4:
                 self.save_model()
             self.recorder.add_reward(episode_reward)
             if self.on_episode_end is not None:
                 self.on_episode_end(episode, episode_reward)
             print('Trainify episode:', episode, ' episode_reward: ', episode_reward)
-            if episode >= 10 and np.min(self.recorder.get_reward_list()[-3:]) > -3:
+            if episode >= 10 and np.min(self.recorder.get_reward_list()[-3:]) > reward_threshold:
                 self.save_model()
                 break
-        print('Trainify 训练完毕 开始验证')
+        self.save_model()
         # self.verify_cegar()
 
         # self.recorder.writeAll2TensorBoard()
@@ -166,6 +170,7 @@ class Trainify:
         }
 
     def do_BBreach(self):
+        self.load_model()
         do_BBReach(self.agent.actor, self.recorder, self.verify_config, self.env_config)
 
 

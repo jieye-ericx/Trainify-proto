@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 
 # 获取文件所在的当前路径
@@ -5,7 +7,7 @@ from trainify.utils import str_to_list
 from trainify.env import Pendulum
 from trainify.agent import DDPGAgent
 from trainify import Trainify
-
+from trainify.env.BBReach.b4 import B4Env
 from evaluate.evaluate_pendulum import evaluate_pendulum
 
 if __name__ == "__main__":
@@ -27,7 +29,7 @@ if __name__ == "__main__":
         'capacity': 10000,
         'batch_size': 32,
         'hidden_size': 256,
-        'models_need_save': ['actor', 'critic', 'actor_target', 'critic_target'],
+        'models_need_save': ['actor'],
         "modules": [
             {
                 "type": "linear",
@@ -67,18 +69,23 @@ if __name__ == "__main__":
     }
 
     train_config = {
-        'step_num': 500,
-        'episode_num': 2000
+        'step_num': 150,
+        'episode_num': 2000,
+        'reward_threshold': 470
     }
+    ROOT_PROJECT_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    MODEL_PATH = os.path.join(ROOT_PROJECT_PATH, 'trainify/BBReach')
 
     t = Trainify(
         env_config=env_config,
-        env_class=Pendulum,
+        env_class=B4Env,
         agent_config=agent_config,
         agent_class=DDPGAgent,
-        verify=True,
+        verify=False,
         verify_config=verify_config,
-        experiment_name="test_ddpg_pendulum",
+        experiment_name="test_b4",
+        log_path='/Users/ericx/PycharmProjects/Trainify-proto/data/test_b4_20221028_195530'
     )
-    t.do_BBreach()
+    # t.load_model()
     # t.train_agent(train_config)
+    t.do_BBreach()
