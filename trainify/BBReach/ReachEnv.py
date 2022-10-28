@@ -9,29 +9,30 @@ import numpy as np
 
 from trainify.abstract.divide_tool import str_to_list, max_min_clip, combine_bound_list, near_bound, \
     initiate_divide_tool
-from draw import *
+from trainify.BBReach.draw import *
 import re
 
 from trainify.agent import Actor as ddpgActor
-from interval import interval, inf, imath
 
 
-def do_BBReach(env_config, verify_config, actor_network, recorder):
-    env_config = {
-        "dim": 3,
-        "states_name": ['x1', 'x2', 'x3'],
-        "state_space": [[-2.5, -2.5, -2.5], [2.5, 2.5, 2.5]],
-        "abs_initial_intervals": [0.5, 0.5, 0.5],
-        "state_key_dim": [0, 1],
-        "dynamics": ['x[0] + (-x[0] + x[1] - x[2]) * 0.02', 'x[1] + (-x[0] * (x[2] + 1) - x[1]) * 0.02',
-                     'x[2] + (-x[0] + action) * 0.02'],
-    }
-    verify_config = {
-        "distance_threshold": [0.001, 0.0001, 0.0001],
-        "initial_set": [0.25, 0.08, 0.25, 0.27, 0.1, 0.27],
-        "max_step": 35,
-        "initial_set_partition": [0.01, 0.01, 0.02]
-    }
+def do_BBReach(actor_network, recorder, verify_config=None, env_config=None):
+    if env_config is None:
+        env_config = {
+            "dim": 3,
+            "states_name": ['x1', 'x2', 'x3'],
+            "state_space": [[-2.5, -2.5, -2.5], [2.5, 2.5, 2.5]],
+            "abs_initial_intervals": [0.5, 0.5, 0.5],
+            "state_key_dim": [0, 1],
+            "dynamics": ['x[0] + (-x[0] + x[1] - x[2]) * 0.02', 'x[1] + (-x[0] * (x[2] + 1) - x[1]) * 0.02',
+                         'x[2] + (-x[0] + action) * 0.02'],
+        }
+    if verify_config is None:
+        verify_config = {
+            "distance_threshold": [0.001, 0.0001, 0.0001],
+            "initial_set": [0.25, 0.08, 0.25, 0.27, 0.1, 0.27],
+            "max_step": 35,
+            "initial_set_partition": [0.01, 0.01, 0.02]
+        }
     divide_tool = initiate_divide_tool(env_config['state_space'], env_config['abs_initial_intervals'])
     reach_env = ReachEnv("b4_env", divide_tool=divide_tool, network=actor_network)
     reach_env.state_space = env_config['state_space']
@@ -42,7 +43,9 @@ def do_BBReach(env_config, verify_config, actor_network, recorder):
     # r = [0.25, 0.08, 0.25, 0.27, 0.1, 0.27]
     res_list = calculate_reachable_sets(reach_env, verify_config['initial_set'], verify_config['max_step'])
     draw_box(res_list, False)
-    parallel_list = parallel_cal(reach_env, r, verify_config['initial_set_partition'], verify_config['max_step'], process_num=2)
+    parallel_list = parallel_cal(reach_env, verify_config['initial_set'], verify_config['initial_set_partition'],
+                                 verify_config['max_step'],
+                                 process_num=6)
     draw_box(parallel_list)
     print('finished')
 

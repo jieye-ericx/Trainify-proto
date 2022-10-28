@@ -8,7 +8,7 @@ from trainify.abstract import initiate_divide_tool_rtree, initiate_divide_tool
 from trainify.data import Recorder
 from trainify.validator import cegar
 from trainify.utils import str_to_list
-
+from trainify.BBReach import do_BBReach
 from trainify.env.verify import PendulumEnv
 
 
@@ -164,6 +164,9 @@ class Trainify:
             'min': np.full(shape=num, fill_value=float("inf"), dtype=float).tolist(),
             'max': np.full(shape=num, fill_value=-float("inf"), dtype=float).tolist()
         }
+
+    def do_BBreach(self):
+        do_BBReach(self.agent.actor, self.recorder, self.verify_config, self.env_config)
 
 
 if __name__ == '__main__':
