@@ -7,7 +7,7 @@ import matplotlib.patches as patches
 from matplotlib.ticker import MultipleLocator
 
 
-def draw_box(box_list, save=False):
+def draw_box(box_list, recorder=None, parallel=False):
     l = math.inf
     r = -math.inf
     b = math.inf
@@ -34,18 +34,11 @@ def draw_box(box_list, save=False):
                 edgecolor='red'
             )
         )
-    # 绘制目标区域
-    ax.add_patch(
-        patches.Rectangle(
-            (-0.05, -0.05),
-            0.1,
-            0.05,
-            fill=None,
-            edgecolor='blue'
-        )
-    )
-    if save:
-        plt.savefig('b4_box.png', dpi=200)
+    if recorder is not None:
+        if parallel:
+            plt.savefig(recorder.get_data_path() + '/env_parallel_BBReach.png', dpi=200)
+        else:
+            plt.savefig(recorder.get_data_path() + '/env_BBReach.png', dpi=200)
     plt.show(aspect='auto')
 
 

@@ -42,11 +42,11 @@ def do_BBReach(actor_network, recorder, verify_config=None, env_config=None):
     reach_env.standard = verify_config['distance_threshold']
     # r = [0.25, 0.08, 0.25, 0.27, 0.1, 0.27]
     res_list = calculate_reachable_sets(reach_env, verify_config['initial_set'], verify_config['max_step'])
-    draw_box(res_list, False)
+    draw_box(res_list, recorder)
     parallel_list = parallel_cal(reach_env, verify_config['initial_set'], verify_config['initial_set_partition'],
                                  verify_config['max_step'],
-                                 process_num=6)
-    draw_box(parallel_list)
+                                 process_num=2)
+    draw_box(parallel_list, recorder, parallel=True)
     print('finished')
 
     return 0
