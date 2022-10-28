@@ -8,7 +8,6 @@ import torch.optim as optim
 from trainify.utils import str_to_list
 
 
-
 def create_modules(agent_config):
     """
     根据解析cfg文件的结果来构造模块
@@ -16,7 +15,7 @@ def create_modules(agent_config):
     :return:
     """
     blocks = agent_config.get("modules")
-    assert blocks is not None , "没有给定actor网络参数"
+    assert blocks is not None, "没有给定actor网络参数"
     module = nn.Sequential()
 
     for index, x in enumerate(blocks[:]):
@@ -31,7 +30,6 @@ def create_modules(agent_config):
             bias_zero = x["bias_zero"]
             activation = x["activation"]
 
-
             # Add the linear layer
             linear = nn.Linear(in_features=in_features, out_features=out_features)
             linear.weight.data.normal_(mean, std)
@@ -45,8 +43,8 @@ def create_modules(agent_config):
                 act = nn.Tanh()
                 module.add_module("tanh_{0}".format(index), act)
 
-
     return module
+
 
 class Actor(nn.Module):
     def __init__(self, agent_config):
@@ -87,9 +85,9 @@ class DDPGAgent(object):
         s_dim = self.env.observation_space.shape[0] * 2
         a_dim = self.env.action_space.shape[0]
 
-        self.actor = Actor(s_dim, self.hidden_size, a_dim)
-        self.network = Actor(s_dim, self.hidden_size, a_dim)
-        self.actor_target = Actor(s_dim, self.hidden_size, a_dim)
+        self.actor = Actor(self.config)
+        self.network = Actor(self.config)
+        self.actor_target = Actor(self.config)
         self.critic = Critic(s_dim + a_dim, self.hidden_size, a_dim)
         self.critic_target = Critic(s_dim + a_dim, self.hidden_size, a_dim)
         self.actor_optim = optim.Adam(self.actor.parameters(), lr=self.actor_lr)
@@ -111,9 +109,9 @@ class DDPGAgent(object):
         s_dim = self.originEnv.observation_space.shape[0] * 2
         a_dim = self.originEnv.action_space.shape[0]
 
-        self.actor = Actor(s_dim, self.hidden_size, a_dim)
-        self.network = Actor(s_dim, self.hidden_size, a_dim)
-        self.actor_target = Actor(s_dim, self.hidden_size, a_dim)
+        self.actor = Actor(self.config)
+        self.network = Actor(self.config)
+        self.actor_target = Actor(self.config)
         self.critic = Critic(s_dim + a_dim, self.hidden_size, a_dim)
         self.critic_target = Critic(s_dim + a_dim, self.hidden_size, a_dim)
         self.actor_optim = optim.Adam(self.actor.parameters(), lr=self.actor_lr)
@@ -173,18 +171,18 @@ class DDPGAgent(object):
         soft_update(self.critic_target, self.critic, self.tau)
         soft_update(self.actor_target, self.actor, self.tau)
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     agent_config = {
-        "modules" : [
+        "modules": [
             {
-                "type" : "linear",
+                "type": "linear",
                 "in_features": 8,
                 "out_features": 8,
                 "mean": 0,
                 "std": 0.1,
                 "bias_zero": True,
-                "activation":"tanh",
+                "activation": "tanh",
             },
             {
                 "type": "linear",

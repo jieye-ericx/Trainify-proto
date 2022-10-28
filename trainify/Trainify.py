@@ -3,11 +3,13 @@ import time
 import re
 import gym
 import numpy as np
+
 from trainify.abstract import initiate_divide_tool_rtree, initiate_divide_tool
-from trainify.agent import DDPGAgent
 from trainify.data import Recorder
 from trainify.validator import cegar
 from trainify.utils import str_to_list
+
+from trainify.env.verify import PendulumEnv
 
 
 class Trainify:
@@ -19,7 +21,9 @@ class Trainify:
                  verify_config={},
                  verify=False,
                  log_dir='',
-                 experiment_name="default_name"):
+                 experiment_name="default_name",
+                 on_episode_end=None,
+                 ):
         self.env_config = env_config
         self.env_class = env_class
         self.agent_config = agent_config
@@ -29,7 +33,6 @@ class Trainify:
         self.experiment_name = experiment_name
         self.rtree_name = 'rtree_' + experiment_name
         self.experiment_name_with_time = experiment_name + time.strftime("_%Y%m%d_%H%M%S", time.localtime())
-
         if log_dir == '':
             log_dir = self.experiment_name_with_time
         self.log_dir = log_dir
@@ -55,26 +58,38 @@ class Trainify:
                                                     self.env_config['abs_initial_intervals'])
 
         # print(self.agent.__dict__['actor'])
-        self.save_model = self.recorder.create_save_model(self.agent)
-        self.load_model = self.recorder.create_load_model(self.agent)
+        self.save_model = self.recorder.create_save_model(self.agent, self.agent_config)
+        self.load_model = self.recorder.create_load_model(self.agent, self.agent_config)
         self.recorder.save_model = self.save_model
         self.recorder.load_model = self.load_model
+        self.agent.save_model = self.save_model
+        self.agent.load_model = self.load_model
         self.create_cal_state_func(self.env_config, self.env)
+        self.on_episode_end = on_episode_end
 
-    def run_verify_cegar(self, verify_env, train_func=None):
+    # def run_reach(self):
+    # res=xxx(self.reach_config,self.recorder)
+    #     res={imgPath:/Users/ericx/PycharmProjects/Trainify-proto/data/test_ddpg_pendulum_20221025_155240/reachimgs}
+
+    def verify_cegar(self, verify_env=PendulumEnv, train_func=None):
         if not self.verify:
             print('Trainify 初始化Trainify时verify未设置为True，请重新初始化')
             return
         # TODO 构建验证用env
         if train_func is None: train_func = self.train_agent
-        cegar(self.rtree_name, self.agent, self.divide_tool, verify_env, self.verify_config)
+        self.load_model()
+        cegar(self.rtree_name,
+              self.agent,
+              self.divide_tool,
+              train_func,
+              verify_env(self.divide_tool, self.agent.actor),
+              self.verify_config)
 
     def train_agent(self, config={'step_num': 500, 'episode_num': 2000}, name=''):
         step_num = config['step_num']
         episode_num = config['episode_num']
         if name == '': name = 'default_name' + time.strftime("_%Y%m%d_%H%M%S", time.localtime())
         self.recorder.create_data_result(name)
-
         for episode in range(episode_num):
             episode_reward = 0
             s = self.env.reset()
@@ -90,14 +105,18 @@ class Trainify:
                 s = s_next
                 abs = abs_next
             if episode % 5 == 4:
-                self.save_model(['actor', 'critic', 'actor_target', 'critic_target'])
+                self.save_model()
             self.recorder.add_reward(episode_reward)
-            print('episode: ', episode, ' episode_reward: ', episode_reward)
-
+            if self.on_episode_end is not None:
+                self.on_episode_end(episode, episode_reward)
+            print('Trainify episode:', episode, ' episode_reward: ', episode_reward)
             if episode >= 10 and np.min(self.recorder.get_reward_list()[-3:]) > -3:
-                self.save_model(['actor', 'critic', 'actor_target', 'critic_target'])
+                self.save_model()
                 break
-        self.recorder.writeAll2TensorBoard()
+        print('Trainify 训练完毕 开始验证')
+        # self.verify_cegar()
+
+        # self.recorder.writeAll2TensorBoard()
 
     def create_cal_state_func(self, config, Env):
         labels = [

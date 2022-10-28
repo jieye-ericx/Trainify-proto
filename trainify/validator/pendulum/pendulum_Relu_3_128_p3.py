@@ -3,7 +3,7 @@ import sys
 
 from trainify.abstract.pendulum.pendulum_abs import *
 from trainify.validator.cegar import cegar
-from trainify.validator.pendulum.pendulum_env import PendulumEnv
+from trainify.env.verify.pendulum_env import PendulumEnv
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(BASE_DIR)

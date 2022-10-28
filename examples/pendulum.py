@@ -24,7 +24,37 @@ if __name__ == "__main__":
         'tau': 0.02,
         'capacity': 10000,
         'batch_size': 32,
-        'hidden_size': 128
+        'hidden_size': 256,
+        'models_need_save': ['actor', 'critic', 'actor_target', 'critic_target'],
+        "modules": [
+            {
+                "type": "linear",
+                "in_features": 8,
+                "out_features": 8,
+                "mean": 0,
+                "std": 0.1,
+                "bias_zero": True,
+                "activation": "tanh",
+            },
+            {
+                "type": "linear",
+                "in_features": 8,
+                "out_features": 8,
+                "mean": 0,
+                "std": 0.1,
+                "bias_zero": True,
+                "activation": "tanh",
+            },
+            {
+                "type": "linear",
+                "in_features": 8,
+                "out_features": 2,
+                "mean": 0,
+                "std": 0.1,
+                "bias_zero": True,
+                "activation": None,
+            },
+        ]
     }
 
     verify_config = {
@@ -36,6 +66,11 @@ if __name__ == "__main__":
         'episode_num': 2000
     }
 
+
+    def testEE(e, r):
+        print('123 ', e, r)
+
+
     t = Trainify(
         env_config=env_config,
         env_class=Pendulum,
@@ -44,6 +79,7 @@ if __name__ == "__main__":
         verify=True,
         verify_config=verify_config,
         experiment_name="test_ddpg_pendulum",
+        on_episode_end=testEE
     )
 
     t.train_agent(train_config)

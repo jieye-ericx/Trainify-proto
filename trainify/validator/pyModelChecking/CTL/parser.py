@@ -36,7 +36,7 @@ class Parser(BaseParser):
 
     def __init__(self, language=None):
         if language is None:
-            import pyModelChecking.CTL as CTL
+            import trainify.validator.pyModelChecking.CTL as CTL
 
             language = CTL
 

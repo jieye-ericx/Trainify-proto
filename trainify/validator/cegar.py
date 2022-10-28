@@ -8,14 +8,14 @@ from trainify.validator import FMValidator
 record_num = 1
 
 
-def cegar(rtree_name, agent, divide_tool, train_model, verify_env, config):
-    max_iteration = config.max_iteration
+def cegar(rtree_name, agent, divide_tool, train_func, verify_env, config):
+    max_iteration = config['max_iteration']
 
-    print('Verify cegar 开始时间' + time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime()))
+    print('Verify cegar验证 开始时间' + time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime()))
     t0 = time.time()
     # 此时agent应该已经训练好了
     # train_model(agent)
-    agent.load()
+    # agent.load()
     # evaluate(agent)
     tr = time.time()
     v = FMValidator(verify_env, agent.network)
@@ -47,9 +47,9 @@ def cegar(rtree_name, agent, divide_tool, train_model, verify_env, config):
         agent.divide_tool = divide_tool
         # agent.load()
         agent.reset()
-        train_model(agent)
+        train_func()
 
-        agent.load()
+        agent.load_model()
         # evaluate(agent)
         tr = time.time()
         verify_env.divide_tool = divide_tool
@@ -77,9 +77,9 @@ def cegar(rtree_name, agent, divide_tool, train_model, verify_env, config):
         t0 = time.time()
         # agent.load()
         agent.reset()
-        train_model(agent)
+        train_func()
 
-        agent.load()
+        agent.load_model()
         tr = time.time()
         # verify_env.divide_tool = divide_tool
         verify_env.network = agent.network
@@ -97,3 +97,5 @@ def cegar(rtree_name, agent, divide_tool, train_model, verify_env, config):
         t2 = time.time()
         print('Verify cegar train:', tr - t0, 'construct kripke structure:', t1 - tr, 'model checking:', t2 - t1)
         print(time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime()))
+
+    print('Verify 验证结束 ', '构建kripke所花时间:', t1 - tr, '模型检查时间:', t2 - t1)
