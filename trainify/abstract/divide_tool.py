@@ -223,9 +223,9 @@ def initiate_divide_tool_rtree(state_space, initial_intervals, key_dim, file_nam
     if key_dim is not None:
         p = index.Property()
         p.dimension = len(key_dim)
-        rtree = index.Index(file_name, properties=p)
-        if rtree.get_size() == 0:
-            rtree = index.Index(file_name, divide(key_state_space, key_initial_intevals), properties=p)
+        # rtree = index.Index(file_name, properties=p)
+        # if rtree.get_size() == 0:
+        rtree = index.Index(file_name, divide(key_state_space, key_initial_intevals), properties=p)
         print('DivideTool rtree状态数量', rtree.get_size())
     else:
         key_dim = []

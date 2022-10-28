@@ -29,8 +29,8 @@ if __name__ == "__main__":
         "modules": [
             {
                 "type": "linear",
-                "in_features": 8,
-                "out_features": 8,
+                "in_features": 6,
+                "out_features": 20,
                 "mean": 0,
                 "std": 0.1,
                 "bias_zero": True,
@@ -38,8 +38,8 @@ if __name__ == "__main__":
             },
             {
                 "type": "linear",
-                "in_features": 8,
-                "out_features": 8,
+                "in_features": 20,
+                "out_features": 20,
                 "mean": 0,
                 "std": 0.1,
                 "bias_zero": True,
@@ -47,12 +47,21 @@ if __name__ == "__main__":
             },
             {
                 "type": "linear",
-                "in_features": 8,
-                "out_features": 2,
+                "in_features": 20,
+                "out_features": 20,
                 "mean": 0,
                 "std": 0.1,
                 "bias_zero": True,
-                "activation": None,
+                "activation": 'tanh',
+            },
+            {
+                "type": "linear",
+                "in_features": 20,
+                "out_features": 1,
+                "mean": 0,
+                "std": 0.1,
+                "bias_zero": True,
+                "activation": 'tanh',
             },
         ]
     }
