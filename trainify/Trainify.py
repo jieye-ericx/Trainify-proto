@@ -87,7 +87,8 @@ class Trainify:
               verify_env(self.divide_tool, self.agent.actor),
               self.verify_config)
 
-    def train_agent(self, config={'step_num': 500, 'episode_num': 2000}, name=''):
+    def train_agent(self, config={'step_num': 500, 'episode_num': 2000, 'reward_threshold': -3}, name=''):
+        print('Trainify 开始训练')
         step_num = config['step_num']
         episode_num = config['episode_num']
         reward_threshold = config['reward_threshold']
@@ -118,6 +119,7 @@ class Trainify:
                 self.save_model()
                 break
         self.save_model()
+        print('Trainify 训练结束')
         # self.verify_cegar()
 
         # self.recorder.writeAll2TensorBoard()
