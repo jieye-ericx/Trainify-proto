@@ -17,7 +17,7 @@
 Trainify是一个针对深度强化学习（DRL）系统的训练和验证框架，通过将验证与训练相结合来得到一个安全的DRL系统。该方法一共包含三块内容：基于抽象状态的训练，构造出Kripke
 structure进行模型检测，根据模型检测的结果对抽象状态进行精化，整体流程图如下。
 
-<img src="./aaa.assets/image-20221029122415113.png" alt="image-20221029122415113" style="zoom:50%;" />
+![image-20221029122415113](./aaa.assets/image-20221029122415113.png)
 
 在训练部分，根据一个初始的抽象粒度，连续的状态空间会被划分成有限个抽象状态，我们首先将具体状态映射为抽象状态，决策神经网络接收抽象状态为输入，并输出action。在验证部分，我们会在有限的抽象状态空间上，根据神经网络的决策，构建出Kripke
 structure，并且验证由ACTL所定义的性质。如果验证通过则整个过程结束，否则会进入精化阶段，该部分会将验证过程中所返回的不满足性质的抽象状态划分为多个更小的抽象状态，之后重新在精化后的抽象状态空间上进行抽象训练。
@@ -130,9 +130,11 @@ tensorboard --logdir=log_dir
 ## 5 Web在线使用与发布
 
 1. Web
-
-   为了使本原型工具更易于使用与推广，我们基于最新的技术栈搭建了前后端分离的在线系统，以加速用户的入门，前端仓库地址https:
-   //github.com/jieye-ericx/RL-platform-frontend，后端仓库地址：https://github.com/jieye-ericx/RL-platform-backend。可以访问在浏览器中输入http://47.103.212.239:8500/进行使用。
+   在浏览器中访问：http://47.103.212.239:8500
+   为了使本原型工具更易于使用与推广，我们基于最新的技术栈搭建了前后端分离的在线系统，以加速用户的入门，
+   前端仓库地址：https://github.com/jieye-ericx/RL-platform-frontend
+   后端仓库地址：https://github.com/jieye-ericx/RL-platform-backend
+   
 
 2. pypi （用于支持pip下载）
 
