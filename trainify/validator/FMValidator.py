@@ -7,7 +7,7 @@ from trainify.validator.pyModelChecking.CTL import Parser, modelcheck
 
 
 class FMValidator:
-    def __init__(self, configurator, net):
+    def __init__(self, configurator, net, logger):
 
         self.initial_states = configurator.initial_state
         self.initial_states_region = configurator.initial_state_region
@@ -36,6 +36,7 @@ class FMValidator:
 
         # debug
         self.visited_list = []
+        self.logger = logger
 
     def get_initial_state(self):
         self.abstract_initial_states = []
@@ -45,7 +46,7 @@ class FMValidator:
                 self.abstract_initial_states.append(s)
         else:
             self.abstract_initial_states.append(self.get_abstract_state(self.initial_states))
-        print('number of initial states:', len(self.abstract_initial_states))
+        self.logger.info('number of initial states:' + str(len(self.abstract_initial_states)))
 
     def create_kripke_ctl(self):
         label_dict = {}
@@ -62,7 +63,7 @@ class FMValidator:
             bfs.put(abstract_state)
             abstract_state_count += 1
             sta_cnt += 1
-            # print("初始抽象状态", abstract_state)
+            # self.logger.info("初始抽象状态"+ str(abstract_state))
 
         edges = []
         edge_set = set()
@@ -104,24 +105,25 @@ class FMValidator:
                         label_dict[des_low_dim] = s_label
                         # if len(s_label) == 0:
                         #     if bad_label_cnt <= 1:
-                        #         print('current state-----------', current)
+                        #         self.logger.info('current state-----------'+ str(current))
                         #     bad_state = True
                         #     bad_label_cnt += 1
                         abstract_state_count += 1
             t3 = time.time()
-            print(abstract_state_count, sta_cnt, 'depth', i, t3 - t0, ' ', tt, 'increase',
-                  abstract_state_count - old_abs_cnt)
+            self.logger.info(str(abstract_state_count) + str(sta_cnt) + 'depth' + str(i) + str(t3 - t0) + ' ' + str(
+                tt) + 'increase' +
+                             str(abstract_state_count - old_abs_cnt))
             # if bad_state:
             #     return None
             old_abs_cnt = abstract_state_count
-            # print(abstract_state_count, 'depth', i, t3 - t0, ' ', tt, '--', mlp, '---', rmp)
+            # self.logger.info(str(abstract_state_count)+ 'depth'+str( i)+str( t3 - t0)+ ' '+ str(tt)+ '--'+ str(mlp)+ '---'+str( rmp))
 
-        print("final_state_count: ", abstract_state_count)
+        self.logger.info("final_state_count: " + str(abstract_state_count))
         for i in range(len(self.visited_list) - 1):
             if not (self.visited_list[i], self.visited_list[i + 1]) in edges:
-                print('error')
+                self.logger.error('error')
         k = Kripke(R=edges, L=label_dict)
-        print(k.labels())
+        self.logger.info(str(k.labels()))
 
         return k
 
@@ -130,7 +132,7 @@ class FMValidator:
         f = parser(self.formula)
         qualified_states = modelcheck(k, f)
         s_n = len(self.abstract_initial_states)
-        print(s_n, self.formula)
+        self.logger.info(str(s_n) + self.formula)
         # 验证qualified_states是否包含所有初始状态
         flag = True
         sat = 0
@@ -145,11 +147,11 @@ class FMValidator:
                 sat += 1
 
         if flag:
-            print("CTL formula satisfied:", self.formula, sat, unsat)
+            self.logger.info("CTL formula satisfied:" + str(self.formula) + str(sat) + str(unsat))
             return True, qualified_states
 
         else:
-            print("CTL formula not satisfied:", self.formula, sat, unsat)
+            self.logger.info("CTL formula not satisfied:" + str(self.formula) + str(sat) + str(unsat))
             if unsat < s_n:
                 return True, qualified_states
             else:

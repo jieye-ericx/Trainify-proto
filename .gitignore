@@ -3,6 +3,8 @@
 ###project###
 data/**
 
+**/*.idx
+**/*.dat
 ### macOS ###
 # General
 .DS_Store

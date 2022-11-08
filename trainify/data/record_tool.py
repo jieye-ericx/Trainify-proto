@@ -4,6 +4,7 @@ import sys
 import torch
 from tensorboardX import SummaryWriter
 import subprocess
+from trainify.data.logger import Logger
 
 ROOT_PROJECT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ROOT_DATA_PATH = os.path.join(ROOT_PROJECT_PATH, "data")
@@ -12,39 +13,42 @@ ROOT_DATA_PATH = os.path.join(ROOT_PROJECT_PATH, "data")
 class Recorder:
     def __init__(self,
                  experiment_name,
-                 data_dir_name,
-                 log_path
+                 result_dir_name,
+                 result_path
                  ):
-        print('Recorder init')
+
         self.experiment_name = experiment_name
-        self.data_dir_name = data_dir_name
-        if log_path is None:
-            self.data_path = os.path.join(ROOT_DATA_PATH, data_dir_name)
-        else:
-            self.data_path = log_path
+        self.result_dir_name = result_dir_name
+
         # print(self.data_path)
-        self.data_path_tensorboard = self.data_path + '/tensorboard'
-        self._create_dir(self.data_path)
+        self.data_dir = result_path + '/' + self.result_dir_name
+        self.data_dir_tensorboard = self.data_dir + '/tensorboard'
+        self.data_dir_log = self.data_dir + '/log'
+        self.data_dir_model = self.data_dir + '/model'
+        self.Logger = Logger(log_path=self.data_dir_log)
+        self.logger = self.Logger.create_logger(logger_name='log_' + self.experiment_name)
+
+        self._create_dir(self.data_dir)
+        self._create_dir(self.data_dir_log)
+        self._create_dir(self.data_dir_model)
+        self._create_dir(self.data_dir_tensorboard)
+
         self.reward = {}
-        self.temp_name = ''
+        self.current_experiment_name = ''
+        self.logger.info('Recorder init success')
 
     def _create_dir(self, path):
-        """
-        创建tensorboard结果文件的储存文件夹
-        :param path:
-        :return:
-        """
         if not os.path.exists(path):
             os.makedirs(path)
-        print('Recorder 数据存储文件夹创建完成：' + path)
-        return path
+        self.logger.info('Recorder 数据存储文件夹创建完成：' + path)
+        return None
 
-    def create_data_result(self, title):
+    def create_experiment(self, title):
         self.temp_name = title
         self.reward.update({title: {'name': title, 'reward_list': []}})
 
     def get_data_path(self):
-        return self.data_path
+        return self.data_dir
 
     def add_reward(self, reward, title=''):
         if title == '':
@@ -69,7 +73,7 @@ class Recorder:
         if title == '':
             title = self.temp_name
 
-        writer = SummaryWriter(log_dir=self.data_path_tensorboard)
+        writer = SummaryWriter(log_dir=self.data_dir_tensorboard)
         for title in self.reward.keys():
             for i in range(len(self.reward[title]['reward_list'])):
                 writer.add_scalar(tag=title, scalar_value=self.reward[title]['reward_list'][i], global_step=i)
@@ -93,8 +97,8 @@ class Recorder:
         def save_model():
             for name in agent_config['models_need_save']:
                 if hasattr(agent, name):
-                    torch.save(agent.__dict__[name].state_dict(), self.data_path + '/' + name + '.pt')
-                    print('Trainify 模型 ' + name + ' 保存完毕')
+                    torch.save(agent.__dict__[name].state_dict(), self.data_dir_model + '/' + name + '.pt')
+                    self.logger.info('Trainify 模型 ' + name + ' 保存完毕')
 
         return save_model
 
@@ -102,18 +106,18 @@ class Recorder:
         def load_model():
             for name in agent_config['models_need_save']:
                 if hasattr(agent, name):
-                    agent.__dict__[name].load_state_dict(torch.load(self.data_path + '/' + name + '.pt'))
-                    print('Trainify 模型 ' + name + ' 加载完毕')
+                    agent.__dict__[name].load_state_dict(torch.load(self.data_dir_model + '/' + name + '.pt'))
+                    self.logger.info('Trainify 模型 ' + name + ' 加载完毕')
 
         return load_model
 
 
 if __name__ == '__main__':
     a = Recorder('ttt', 'ttt_results')
-    a.create_data_result("test1")
+    a.create_experiment("test1")
     for i in range(100):
         a.add_reward("test1", i * 6)
-    a.create_data_result("test2")
+    a.create_experiment("test2")
     for i in range(100):
         a.add_reward("test2", i * 10)
     a.writeAll2TensorBoard()

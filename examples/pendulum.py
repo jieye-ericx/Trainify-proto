@@ -90,8 +90,10 @@ t = Trainify(
     agent_config=agent_config,
     agent_class=DDPGAgent,
     verify_config=verify_config,
-    experiment_name="test_ddpg_pendulum",
+    # experiment_name="",
+    result_dir_name='tttt',
     verify=True,
+    server=False
     # on_episode_end=on_episode_end_callback
 )
 # 调用训练api，开始训练
