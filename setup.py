@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="Trainify-proto",
-    version="0.1.1",
+    version="0.1.3",
     author="ericx",
     author_email="ericxlee@formail.com",
     description="Trainify-proto",
@@ -20,15 +20,16 @@ setuptools.setup(
     ],
     python_requires='>=3.8',
     install_requires=[
-        'torch==1.10.0',
-        'pandas==1.3.4',
-        'psutil==5.8.0',
-        'Rtree==0.9.7',
-        'lark==0.11.3',
-        'gym==0.23.0',
-        'matplotlib==3.4.3',
-        'numpy==1.20.0',
-        'scipy==1.8.1',
-        'tensorboardX==2.5.1'
+        'torch',
+        'numpy',
+        'scipy',
+        'gym',
+        'colorlog',
+        'tensorboardx',
+        'pandas',
+        'rtree',
+        'matplotlib',
+        'lark',
+        'setuptools'
     ]
 )
