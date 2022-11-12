@@ -24,7 +24,7 @@ class Trainify:
                  verify_config={},
                  verify=False,
                  on_episode_end=None,
-                 server=False,
+                 backend_channel=None,
                  # 输出路径配置
                  experiment_name=_DEFAULT_EXPERIMENT_NAME,
                  result_dir_name=None,  # 默认是实验名+时间
@@ -37,6 +37,7 @@ class Trainify:
         self.agent_class = agent_class
         self.verify_config = verify_config
         self.verify = verify
+        self.backend_channel = backend_channel
         # 实验名称与输出路径设置，如果用户没有输入则使用默认值
         self.experiment_name = experiment_name
         self.time = time.strftime("_%Y%m%d_%H%M%S", time.localtime())
@@ -62,7 +63,8 @@ class Trainify:
         self.agent = self.agent_class(self.env, config=self.agent_config)
         self.recorder = Recorder(experiment_name=self.experiment_name,
                                  result_dir_name=self.result_dir_name,
-                                 result_path=self.result_path)
+                                 result_path=self.result_path,
+                                 backend_channel=self.backend_channel)
         if self.verify:
             self.divide_tool = initiate_divide_tool_rtree(self.env_config['state_space'],
                                                           self.env_config['abs_initial_intervals'],

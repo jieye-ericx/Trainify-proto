@@ -14,18 +14,19 @@ class Recorder:
     def __init__(self,
                  experiment_name,
                  result_dir_name,
-                 result_path
+                 result_path,
+                 backend_channel
                  ):
 
         self.experiment_name = experiment_name
         self.result_dir_name = result_dir_name
-
+        self.backend_channel = backend_channel
         # print(self.data_path)
         self.data_dir = result_path + '/' + self.result_dir_name
         self.data_dir_tensorboard = self.data_dir + '/tensorboard'
         self.data_dir_log = self.data_dir + '/log'
         self.data_dir_model = self.data_dir + '/model'
-        self.Logger = Logger(log_path=self.data_dir_log)
+        self.Logger = Logger(log_path=self.data_dir_log, channel=self.backend_channel)
         self.logger = self.Logger.create_logger(logger_name='log_' + self.experiment_name)
 
         self._create_dir(self.data_dir)

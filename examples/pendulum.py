@@ -93,7 +93,7 @@ t = Trainify(
     # experiment_name="",
     result_dir_name='tttt',
     verify=True,
-    server=False
+    backend_channel="terers"
     # on_episode_end=on_episode_end_callback
 )
 # 调用训练api，开始训练

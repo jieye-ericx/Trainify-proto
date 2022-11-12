@@ -3,6 +3,7 @@ import logging
 import sys
 import colorlog
 import os
+from trainify.data.backend_logger_handler import BackendHandler
 
 # 是否开启log日志
 LOG_ENABLED = True
@@ -14,7 +15,8 @@ LOG_TO_FILE = True
 LOG_LEVEL = logging.DEBUG
 # 每条日志输出格式
 LOG_FILE_FORMAT = '[%(asctime)s.%(msecs)03d] %(filename)s -> %(funcName)s line:%(lineno)d [%(levelname)s] : %(message)s'
-LOG_CONSOLE_FORMAT = '%(log_color)s[%(asctime)s.%(msecs)03d] %(filename)s -> %(funcName)s line:%(lineno)d [%(levelname)s] : %(message)s'
+LOG_CONSOLE_FORMAT = '%(log_color)s[%(asctime)s.%(msecs)03d] %(filename)s -> %(funcName)s line:%(lineno)d [%(' \
+                     'levelname)s] : %(message)s '
 LOG_CONSOLE_COLOR = {
     'DEBUG': 'white',  # cyan white
     'INFO': 'green',
@@ -25,8 +27,7 @@ LOG_CONSOLE_COLOR = {
 
 
 class Logger(object):
-    def __init__(self, log_path):
-
+    def __init__(self, log_path, channel):
         self.loggers = {}
         self.enabled = LOG_ENABLED  # 是否开启日志
         self.is_console = LOG_TO_CONSOLE  # 是否输出到控制台
@@ -35,6 +36,7 @@ class Logger(object):
         self.level = LOG_LEVEL  # 日志级别
         # self.format = LOG_FORMAT  # 每条日志输出格式
         self.backup_count = 1000000  # 最多存放日志的数量
+        self.channel = channel if channel is not None else False
 
     def create_logger(self, logger_name=None):
         if logger_name is None:
@@ -61,4 +63,9 @@ class Logger(object):
             # file_handler.setLevel(self.level)
             file_handler.setFormatter(logging.Formatter(LOG_FILE_FORMAT))
             logger.addHandler(file_handler)
+
+        if self.enabled and self.channel:
+            back_handler = BackendHandler(self.channel)
+            back_handler.setFormatter(logging.Formatter(LOG_FILE_FORMAT))
+            logger.addHandler(back_handler)
         return logger
