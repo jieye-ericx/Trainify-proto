@@ -4,9 +4,6 @@ import time
 
 import torch
 from scipy.optimize import minimize, Bounds
-import math
-import numpy as np
-
 from trainify.abstract.divide_tool import str_to_list, max_min_clip, combine_bound_list, near_bound, \
     initiate_divide_tool
 from trainify.BBReach.draw import *
@@ -43,10 +40,10 @@ def do_BBReach(actor_network, recorder, verify_config=None, env_config=None):
     # r = [0.25, 0.08, 0.25, 0.27, 0.1, 0.27]
     res_list = calculate_reachable_sets(reach_env, verify_config['initial_set'], verify_config['max_step'])
     draw_box(res_list, recorder)
-    parallel_list = parallel_cal(reach_env, verify_config['initial_set'], verify_config['initial_set_partition'],
-                                 verify_config['max_step'],
-                                 process_num=2)
-    draw_box(parallel_list, recorder, parallel=True)
+    # parallel_list = parallel_cal(reach_env, verify_config['initial_set'], verify_config['initial_set_partition'],
+    #                              verify_config['max_step'],
+    #                              process_num=1)
+    # draw_box(parallel_list, recorder, parallel=True)
     print('finished')
 
     return 0

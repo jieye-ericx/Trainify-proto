@@ -2,8 +2,6 @@ import gym
 from gym import spaces
 from gym.utils import seeding
 import numpy as np
-import math
-from os import path
 
 
 class B4Env(gym.Env):
@@ -50,7 +48,7 @@ class B4Env(gym.Env):
         u = u[0] - offset
         u = u * scala
         # t = 0.02
-        t=0.05
+        t = 0.05
         x1_new = x1 + (-x1 + x2 - x3) * t
         x2_new = x2 + (-x1 * (x3 + 1) - x2) * t
         x3_new = x3 + (-x1 + u) * t
