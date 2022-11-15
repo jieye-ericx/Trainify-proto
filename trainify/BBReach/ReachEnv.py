@@ -38,13 +38,14 @@ def do_BBReach(actor_network, recorder, verify_config=None, env_config=None):
     # TODO
     reach_env.standard = verify_config['distance_threshold']
     # r = [0.25, 0.08, 0.25, 0.27, 0.1, 0.27]
-    res_list = calculate_reachable_sets(reach_env, verify_config['initial_set'], verify_config['max_step'])
+    res_list = calculate_reachable_sets(reach_env, verify_config['initial_set'], verify_config['max_step'],
+                                        logger=recorder.logger)
     draw_box(res_list, recorder)
     # parallel_list = parallel_cal(reach_env, verify_config['initial_set'], verify_config['initial_set_partition'],
     #                              verify_config['max_step'],
     #                              process_num=1)
     # draw_box(parallel_list, recorder, parallel=True)
-    print('finished')
+    recorder.logger.info('finished')
 
     return 0
 
@@ -69,7 +70,7 @@ def create_function(str, max):
     return cal
 
 
-def calculate_reachable_sets(env, initial_bound, time_step, identifier=None):
+def calculate_reachable_sets(env, initial_bound, time_step, identifier=None, logger=None):
     if isinstance(initial_bound, str):
         initial_bound = str_to_list(initial_bound)
     actual_dim = len(env.cd)
@@ -95,15 +96,19 @@ def calculate_reachable_sets(env, initial_bound, time_step, identifier=None):
 
         t1 = time.time()
         if identifier is None:
-            print(t, '：', len(bound_list), min_x1, max_x1, min_x2, max_x2, t1 - t0)
+            logger.info(
+                str(t) + '：' + str(len(bound_list)) + str(min_x1) + str(max_x1) + str(min_x2) + str(max_x2) + str(
+                    t1 - t0))
         t += 1
         if t == time_step:
             if identifier is not None:
-                print(identifier, '：', 'min_x1,', min_x1, 'max_x1,', max_x1, 'min_x2,', min_x2, 'max_x2,', max_x2)
+                logger.info(
+                    str(identifier) + '：' + 'min_x1,' + str(min_x1) + 'max_x1,' + str(max_x1) + 'min_x2,' + str(
+                        min_x2) + 'max_x2,' + str(max_x2))
             break
     et = time.time()
-    print('Overall Time', et - st)
-    print('seg', env.time_seg, 'over-app', env.time_op, 'agg', env.time_agg)
+    logger.info('Overall Time' + str(et - st))
+    logger.info('seg' + str(env.time_seg) + 'over-app' + str(env.time_op) + 'agg' + str(env.time_agg))
     return np.array(res_list)
 
 
