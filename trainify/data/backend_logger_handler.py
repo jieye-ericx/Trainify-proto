@@ -1,3 +1,4 @@
+import json
 import logging
 import logging.config
 import requests
@@ -30,7 +31,8 @@ class BackendHandler(logging.Handler, object):
                     "content": msg
                 }
             }
-            data = {"appkey": APPKEY, "channel": self.channel, "content": content}
+            data = {"appkey": APPKEY, "channel": self.channel, "content": json.dumps(content)}
+            print(data)
             res = requests.post(GOEASY_URL, data=data)
         except Exception:
             self.handleError(record)
