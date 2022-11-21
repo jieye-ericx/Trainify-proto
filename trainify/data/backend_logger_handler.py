@@ -24,7 +24,13 @@ class BackendHandler(logging.Handler, object):
         """
         try:
             msg = self.format(record)
-            data = {"appkey": APPKEY, "channel": self.channel, "content": msg}
+            content = {
+                "type": "msg",
+                "data": {
+                    "content": msg
+                }
+            }
+            data = {"appkey": APPKEY, "channel": self.channel, "content": content}
             res = requests.post(GOEASY_URL, data=data)
         except Exception:
             self.handleError(record)
