@@ -78,11 +78,11 @@ class Recorder:
                 if v.get('type') == type and v.get('data').get('file_path') == data.get('file_path'):
                     find_it = i
                     self.file_list[i] = content
-                    break
+                    return
             if find_it is None:
                 self.file_list.append(content)
-            if self.backend_channel:
-                send_to_backend(self.backend_channel, content)
+                if self.backend_channel:
+                    send_to_backend(self.backend_channel, content)
 
     def create_experiment(self, title):
         self.temp_name = title
