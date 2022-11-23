@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="Trainify-proto",
-    version="0.1.8",
+    version="0.1.9",
     author="ericx",
     author_email="ericxlee@formail.com",
     description="Trainify-proto",
