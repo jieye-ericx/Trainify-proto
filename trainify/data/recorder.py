@@ -55,9 +55,16 @@ class Recorder:
         }
 
     def add_chart(self, name, data):
-        self.chart[name]['x'].append(data['x'])
-        self.chart[name]['y'].append(data['y'])
-
+        if self.chart.get(name) is not None:
+            self.chart[name]['x'].append(data['x'] if data.get('x') is not None else self.chart[name]['x'][-1] + 1)
+            self.chart[name]['y'].append(data['y'])
+        else:
+            self.chart[name] = {
+                "name": name,
+                "desc": data['desc'],
+                "x": [data['x'] if data.get('x') is not None else 1],
+                "y": [data['y']]
+            }
         if self.backend_channel:
             data[name] = name
             data['desc'] = self.chart[name]['desc']

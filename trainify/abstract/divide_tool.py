@@ -184,7 +184,7 @@ def initiate_adaptive_divide_tool(state_space, initial_intervals, key_dim, file_
 
 
 # 用于生成带有rtree的divide_tool
-def initiate_divide_tool_rtree(state_space, initial_intervals, key_dim, file_name):
+def initiate_divide_tool_rtree(state_space, initial_intervals, key_dim, file_name, recorder):
     divide_point = []
     dp_sets = []
     # for i in range(len(state_space[0])):
@@ -226,7 +226,7 @@ def initiate_divide_tool_rtree(state_space, initial_intervals, key_dim, file_nam
         # rtree = index.Index(file_name, properties=p)
         # if rtree.get_size() == 0:
         rtree = index.Index(file_name, divide(key_state_space, key_initial_intevals), properties=p)
-        print('DivideTool rtree状态数量', rtree.get_size())
+        recorder.logger.info('DivideTool rtree状态数量: ' + str(len(rtree)))
     else:
         key_dim = []
     divide_tool = DivideTool(divide_point, dp_sets)
@@ -481,10 +481,10 @@ class DivideTool:
         else:
             state_list.append(abstract_state)
 
-    def rtree_refinement(self, violate_states, start_id):
+    def rtree_refinement(self, violate_states, start_id, recorder):
         print(self.rtree.bounds)
         all_states = list(self.rtree.intersection(self.rtree.bounds, objects=True))
-        print('所有状态数量', len(all_states))
+        # recorder.logger.warnning('上一次抽象状态数量 ' + str(len(all_states)))
         key_dim = len(self.key_dim)
         cnt1 = 0
         cnt2 = 0
@@ -510,7 +510,7 @@ class DivideTool:
             else:
                 cnt2 += 1
                 yield state.id, tuple(state.bbox), state_str
-        print('---------', cnt1, cnt2, cnt3)
+        recorder.logger.warning('反例数量： ' + str(cnt1) + ' 抽象状态数量：' + str(cnt2 + cnt3))
         return start_id
 
     def adaptive_partition(self, abstract_state, bound, max_id):

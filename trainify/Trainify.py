@@ -65,14 +65,6 @@ class Trainify:
                                  result_dir_name=self.result_dir_name,
                                  result_path=self.result_path,
                                  backend_channel=self.backend_channel)
-        if self.verify:
-            self.divide_tool = initiate_divide_tool_rtree(self.env_config['state_space'],
-                                                          self.env_config['abs_initial_intervals'],
-                                                          self.env_config['state_key_dim'],
-                                                          self.rtree_name)
-        else:
-            self.divide_tool = initiate_divide_tool(self.env_config['state_space'],
-                                                    self.env_config['abs_initial_intervals'])
 
         # 初始化附加函数
         self.save_model = self.recorder.create_save_model(self.agent, self.agent_config)
@@ -83,6 +75,15 @@ class Trainify:
         self.agent.load_model = self.load_model
         self.create_cal_state_func(self.env_config, self.env)
         self.on_episode_end = on_episode_end
+
+        if self.verify:
+            self.divide_tool = initiate_divide_tool_rtree(self.env_config['state_space'],
+                                                          self.env_config['abs_initial_intervals'],
+                                                          self.env_config['state_key_dim'],
+                                                          self.rtree_name, self.recorder)
+        else:
+            self.divide_tool = initiate_divide_tool(self.env_config['state_space'],
+                                                    self.env_config['abs_initial_intervals'])
 
     def verify_cegar(self, verify_env=PendulumEnv, train_func=None):
         self.recorder.logger.info('Trainify 训练完毕 开始验证')
@@ -98,7 +99,7 @@ class Trainify:
               train_func,
               verify_env(self.divide_tool, self.agent.actor),
               self.verify_config,
-              self.recorder.logger)
+              self.recorder)
 
     def train_agent(self, config={'step_num': 500, 'episode_num': 2000, 'reward_threshold': -3}, name=None):
         self.recorder.logger.info('Trainify 开始训练')
