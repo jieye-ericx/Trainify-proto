@@ -5,6 +5,7 @@ import torch
 from tensorboardX import SummaryWriter
 import subprocess
 from trainify.data.logger import Logger
+from trainify.utils import send_to_backend
 
 ROOT_PROJECT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ROOT_DATA_PATH = os.path.join(ROOT_PROJECT_PATH, "data")
@@ -17,25 +18,27 @@ class Recorder:
                  result_path,
                  backend_channel
                  ):
-
         self.experiment_name = experiment_name
         self.result_dir_name = result_dir_name
-        self.backend_channel = backend_channel
+        self.backend_channel = backend_channel if backend_channel is not None else False
         # print(self.data_path)
         self.data_dir = result_path + '/' + self.result_dir_name
-        self.data_dir_tensorboard = self.data_dir + '/tensorboard'
         self.data_dir_log = self.data_dir + '/log'
-        self.data_dir_model = self.data_dir + '/model'
+        self.data_dir_file = self.data_dir + '/files'
+        self.data_dir_tensorboard = self.data_dir + '/tensorboard'
+
         self.Logger = Logger(log_path=self.data_dir_log, channel=self.backend_channel)
         self.logger = self.Logger.create_logger(logger_name='log_' + self.experiment_name)
 
         self._create_dir(self.data_dir)
         self._create_dir(self.data_dir_log)
-        self._create_dir(self.data_dir_model)
+        self._create_dir(self.data_dir_file)
         self._create_dir(self.data_dir_tensorboard)
 
+        self.chart = {}
+        self.file_list = []
         self.reward = {}
-        self.current_experiment_name = ''
+
         self.logger.info('Recorder init success')
 
     def _create_dir(self, path):
@@ -43,6 +46,43 @@ class Recorder:
             os.makedirs(path)
         self.logger.info('Recorder 数据存储文件夹创建完成：' + path)
         return None
+
+    def create_chart(self, name, desc):
+        self.chart[name] = {
+            'x': [],
+            'y': [],
+            'desc': desc
+        }
+
+    def add_chart(self, name, data):
+        self.chart[name]['x'].append(data['x'])
+        self.chart[name]['y'].append(data['y'])
+
+        if self.backend_channel:
+            data[name] = name
+            data['desc'] = self.chart[name]['desc']
+            content = {
+                "type": "chart",
+                "data": data
+            }
+            send_to_backend(self.backend_channel, content)
+
+    def add_file(self, type, data):
+        if type.startswith("file/"):
+            content = {
+                "type": type,
+                "data": data
+            }
+            find_it = None
+            for i, v in enumerate(self.file_list):
+                if v.get('type') == type and v.get('data').get('file_path') == data.get('file_path'):
+                    find_it = i
+                    self.file_list[i] = content
+                    break
+            if find_it is None:
+                self.file_list.append(content)
+            if self.backend_channel:
+                send_to_backend(self.backend_channel, content)
 
     def create_experiment(self, title):
         self.temp_name = title
@@ -98,8 +138,12 @@ class Recorder:
         def save_model():
             for name in agent_config['models_need_save']:
                 if hasattr(agent, name):
-                    torch.save(agent.__dict__[name].state_dict(), self.data_dir_model + '/' + name + '.pt')
-                    self.logger.info('Trainify 模型 ' + name + ' 保存完毕')
+                    torch.save(agent.__dict__[name].state_dict(), self.data_dir_file + '/' + name + '.pt')
+                    self.add_file("file/pt", {
+                        "file_path": self.data_dir_file + '/' + name + '.pt',
+                        "info": "训练时保存的模型"
+                    })
+                    self.logger.info('模型 ' + name + ' 保存完毕')
 
         return save_model
 
@@ -107,7 +151,7 @@ class Recorder:
         def load_model():
             for name in agent_config['models_need_save']:
                 if hasattr(agent, name):
-                    agent.__dict__[name].load_state_dict(torch.load(self.data_dir_model + '/' + name + '.pt'))
+                    agent.__dict__[name].load_state_dict(torch.load(self.data_dir_file + '/' + name + '.pt'))
                     self.logger.info('Trainify 模型 ' + name + ' 加载完毕')
 
         return load_model

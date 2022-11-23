@@ -2,9 +2,7 @@ import json
 import logging
 import logging.config
 import requests
-
-APPKEY = "BC-2ecd0636b9944bb6899144921a12af70"
-GOEASY_URL = "http://rest-hangzhou.goeasy.io/publish"
+from trainify.utils import send_to_backend
 
 
 class BackendHandler(logging.Handler, object):
@@ -31,8 +29,6 @@ class BackendHandler(logging.Handler, object):
                     "content": msg
                 }
             }
-            data = {"appkey": APPKEY, "channel": self.channel, "content": json.dumps(content)}
-            print(data)
-            res = requests.post(GOEASY_URL, data=data)
+            send_to_backend(self.channel, content)
         except Exception:
             self.handleError(record)

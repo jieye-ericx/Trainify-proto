@@ -36,7 +36,7 @@ class Logger(object):
         self.level = LOG_LEVEL  # 日志级别
         # self.format = LOG_FORMAT  # 每条日志输出格式
         self.backup_count = 1000000  # 最多存放日志的数量
-        self.channel = channel if channel is not None else False
+        self.channel = channel
 
     def create_logger(self, logger_name=None):
         if logger_name is None:

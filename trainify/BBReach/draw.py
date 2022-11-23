@@ -37,8 +37,16 @@ def draw_box(box_list, recorder=None, parallel=False):
     if recorder is not None:
         if parallel:
             plt.savefig(recorder.get_data_path() + '/env_parallel_BBReach.png', dpi=200)
+            recorder.add_file("file/img", {
+                "file_path": recorder.get_data_path() + '/env_parallel_BBReach.png',
+                "info": "可达集计算图"
+            })
         else:
             plt.savefig(recorder.get_data_path() + '/env_BBReach.png', dpi=200)
+            recorder.add_file("file/img", {
+                "file_path": recorder.get_data_path() + '/env_parallel_BBReach.png',
+                "info": "可达集计算图"
+            })
     plt.show(aspect='auto')
 
 
