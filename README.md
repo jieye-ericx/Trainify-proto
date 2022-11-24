@@ -1,12 +1,14 @@
-# Trainify-proto 和 BBReach 深度强化学习原型工具
+# Trainify-proto :基于抽象训练与验证的安全强化学习原型工具
 
-本原型工具主要包含两部分：
+## 摘要	
 
-第一部分是**已经发表**的CAV 2022(CCF A)
-中[Trainify: A CEGAR-Driven Training and Verification Framework for Safe Deep Reinforcement Learning](https://faculty.ecnu.edu.cn/_upload/article/files/39/62/197880be44aba90d9d44ac6de8bb/b7ef9fd1-51e0-4284-8af0-5d7a2f9f1869.pdf)
-的原型工具,占整个原型工具的主要部分，Trainify-proto在论文代码的基础上进行了重构改进，增强了易用性、可拓展性和通用性，实现了深度强化学习的自定义抽象训练流程和自选形式化验证等功能。
+深度强化学习（DRL）技术在多个领域（如自动驾驶）中得到了应用。在DRL系统中，深度神经网络被用于进行决策控制。但是由于神经网络缺乏可解释性，系统状态空间的无限连续性以及系统动力学方程的非线性等特点使得DRL系统的安全验证面临巨大挑战。本工具Trainify-proto实现了基于抽象的、验证在环的深度强化学习方法实现了DRL系统的构造性安全保证。通过该方法，我们首先从无限连续性状态空间抽象为有限空间，并在抽象空间上训练。由于抽象状态的离散性和有限性，确保训练后的系统可以被准确高效的验证，基于验证结果对抽象状态进行精化并继续训练，直至所有性质被满足。实现了深度强化学习的自定义抽象训练流程和自选形式化验证等功能。同时Trainify-proto还包含同样使用抽象技术对DRL系统进行基于黑盒方式的验证方法与可达性分析，并适用于带有大规神经网络模型的DRL系统，具有较强的易用性、可拓展性和通用性。这也是国际上首款基于抽象技术设计开发的集训练与验证于一体的智能系统训练平台。
 
-第二部分是正在审稿中的针对DRL系统进行可达性分析的BBReach工具，通过对可达性分析问题提出了自己的抽象方法。
+本原型工具包含两部分：
+
+第一部分是**已经发表**的CAV 2022中[Trainify: A CEGAR-Driven Training and Verification Framework for Safe Deep Reinforcement Learning](https://faculty.ecnu.edu.cn/_upload/article/files/39/62/197880be44aba90d9d44ac6de8bb/b7ef9fd1-51e0-4284-8af0-5d7a2f9f1869.pdf)的原型工具,占整个原型工具的**主要部分**，Trainify-proto在论文代码的基础上进行了重构改进，增强了易用性、可拓展性和通用性，实现了深度强化学习的自定义抽象训练流程和自选形式化验证等功能。
+
+第二部分是正在审稿中的针对深度强化学习系统进行可达性分析的BBReach工具，通过对可达性分析问题提出了自己的抽象方法。
 
 ## 1 原型工具原理简介
 
@@ -38,17 +40,17 @@ BBReach是一个针对DRL系统进行可达性分析的技术，该方法同样�
 
 2. git clone：通过`git clone`项目到本地，集成进自己的项目中使用,仓库地址:https://github.com/jieye-ericx/Trainify-proto
 
-3. web在线使用：访问http://47.103.212.239:8500/，按照说明使用
+3. 网页使用：访问http://124.70.128.186:8500/，按照说明使用
 
-不同的使用方式在功能完整性上有一定差异，下面是各功能在不同使用方式上的实现情况：
+目前各功能在不同使用方式上的实现情况：
 
 | 功能              | pypi | git clone | web在线 |
 | ----------------- | ---- | --------- | ------- |
 | 抽象强化学习训练  | ✅    | ✅         | ✅       |
 | 抽象强化学习验证  | ✅    | ✅         | ✅       |
-| BBReach可达集计算 | ✅    | ✅         | ❌       |
+| BBReach可达集计算 | ✅    | ✅         | ✅       |
 
-在未来的版本中，各使用方式的功能会逐步完善。
+在未来的版本中，会加入更多训练功能和优化体验。
 
 ## 3 原型工具核心模块介绍
 
@@ -76,12 +78,9 @@ Trainify.py # 本原型工具主进程类
 `Trainify.py`文件中存放了本工具的入口类，上述各核心模块的调度与使用都由生成的`Trainify`
 对象完成，称其为胶水类也不为过，各模块代码之间相互独立，各司其职，耦合性极低，模块之间的关系如图所示：
 
-![image-20221028214504139](./README.assets/image-20221028214504139.png)
+![image-20221124223830674](./README.assets/image-20221124223830674.png)
 
-`abstract`
-模块让正常的强化学习环境拥有了进行抽象强化学习的能力，通过调度拥有抽象训练能力的环境和强化学习模型（agent），`Trainify`
-可以完成训练过程，接着根据用户的选择可以将训练好的模型用于**形式化模型检查**或**BBReach可达集计算**
-，在运行过程中产生的数据会被`data`模块中的`recorder`记录，用于保存数据和各种输出。
+`abstract`模块让正常的强化学习环境拥有了进行抽象强化学习的能力，通过调度拥有抽象训练能力的环境和强化学习模型（agent），`Trainify`可以完成训练过程，接着根据用户的选择可以将训练好的模型用于**验证**或**可达集计算**，在运行过程中产生的数据会被`data`模块中的`recorder`记录，用于保存数据和各种方式的输出。
 
 ## 4 原型工具API介绍
 
@@ -115,25 +114,22 @@ t.train_agent(train_config)  # BBReach可达集计算
 
 训练结束后，除了控制台的输出，相关模型、图片已经被保存到了设置的路径下，可以通过`t.recorder.get_data_path()`查看输出的路径。
 
-**附加：tensorboard查看训练/验证结果**
-
-```bash
-#在代码中
-t.recorder.writeAll2TensorBoard() # 将recorder记录到的数据写入tensorboard文件
-# 在终端中
-# 先安装tensorboard
-pip install tensorboard
-# log_dir替换为需要查看的实验目录
-tensorboard --logdir=log_dir
-```
-
-## 5 Web在线使用与发布
+## 5 网页使用与发布
 
 1. Web
-   在浏览器中访问：http://47.103.212.239:8500
-   为了使本原型工具更易于使用与推广，我们基于最新的技术栈搭建了前后端分离的在线系统，以加速用户的入门，
+
+   为了使本原型工具更易于使用与推广，我们基于最新的技术栈搭建了前后端分离的在线系统，以加速用户的入门，在浏览器中访问：http://124.70.128.186:8500
    前端仓库地址：https://github.com/jieye-ericx/RL-platform-frontend
    后端仓库地址：https://github.com/jieye-ericx/RL-platform-backend
+
+   验证时的截图：
+
+   ![3431669295211_.pic](./README.assets/3441669295211_.pic.jpg)
+
+   计算可达集时的截图：
+
+   ![3431669295211_.pic](./README.assets/3431669295211_.pic-9300973.jpg)
+
    
 
 2. pypi （用于支持pip下载）

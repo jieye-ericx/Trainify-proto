@@ -157,6 +157,9 @@ class Recorder:
             for name in agent_config['models_need_save']:
                 if hasattr(agent, name):
                     agent.__dict__[name].load_state_dict(torch.load(self.data_dir_file + '/' + name + '.pt'))
+                    if name == 'actor':
+                        agent.__dict__['network'].load_state_dict(torch.load(self.data_dir_file + '/' + name + '.pt'))
+                        self.logger.info('Trainify 模型 network 加载完毕')
                     self.logger.info('Trainify 模型 ' + name + ' 加载完毕')
 
         return load_model

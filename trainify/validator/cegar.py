@@ -16,6 +16,7 @@ def cegar(rtree_name, agent, divide_tool, train_func, verify_env, config, record
     # 此时agent应该已经训练好了
     # train_model(agent)
     # agent.load()
+    agent.load_model()
     # evaluate(agent)
     tr = time.time()
     v = FMValidator(verify_env, agent.network, recorder.logger)
@@ -96,11 +97,15 @@ def cegar(rtree_name, agent, divide_tool, train_func, verify_env, config, record
         if k is None:
             violated_states = list(divide_tool.rtree.intersection(divide_tool.rtree.bounds, objects='raw'))
             res2 = True
-            recorder.logger.info('Verify cegar number of counterexamples：' + str(len(violated_states)))
+
         else:
             # v.formula = 'not(A(G(safe)))'
             res2, violated_states = v.ctl_model_check(k)
-            recorder.logger.info('Verify cegar number of counterexamples：' + str(len(violated_states)))
+        recorder.logger.info('Verify cegar number of counterexamples：' + str(len(violated_states)))
+        recorder.add_chart('精化后的抽象状态数量', {
+            "desc": "精化后的抽象状态数量",
+            'y': len(violated_states),
+        })
         t2 = time.time()
         recorder.logger.info('Verify cegar train: ' + str(tr - t0) +
                              'construct kripke structure: ' + str(t1 - tr) + str(' model checking: ') + str(t2 - t1))
