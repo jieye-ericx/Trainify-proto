@@ -66,11 +66,9 @@ class Recorder:
                 "y": [data['y']]
             }
         if self.backend_channel:
-            data[name] = name
-            data['desc'] = self.chart[name]['desc']
             content = {
                 "type": "chart",
-                "data": data
+                "data": self.chart[name]
             }
             send_to_backend(self.backend_channel, content)
 
